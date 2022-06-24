@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body style="background-color: whitesmoke;">
+<h2 align="center"> {{ hours }} diliminde bulunan coinler</h2>
+
+
+<button onclick="goBack()">Go Back</button>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+
+<div style="width: 60%; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between;">
+        <h3>Borsa-coin</h3>
+        <h3>rsi</h3>
+        <h3>grafik</h3>
+    </div>
+    {% for coin  in line_list %}
+
+
+ <div style="display: flex; justify-content: space-between;">
+
+            {% set coins  =coin.split(':') %}
+            <a onclick=location.href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}">
+                {{ coin }}
+
+            </a>
+            <a> </a>
+
+            <img align="center" src="https://www.coingecko.com/coins/{{ 2 }}/sparkline"/>
+        </div>
+    {% endfor %}
+
+
+</div>
+</body>
+
+</html>

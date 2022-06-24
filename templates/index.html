@@ -1,0 +1,22 @@
+<html>
+<head>
+    <style>
+    </style>
+</head>
+<body style="background-color:seagreen;">
+<h1>Crypto Market Scanner</h1>
+<p>{{ hours_time }}</p>
+<form action="list" method="POST">
+
+    <select name="saatler">
+        <option value="15m">-- Saat dilimini şeçiniz --</option>
+        {% for hour in Hourss %}
+            <option value=" {{ hour }} ">{{ hour }}</option>
+        {% endfor %}
+    </select>
+
+     <input type="number" name="bbw" step="0.001" placeholder="bbw">
+    <input type="submit" value="Scan"/>
+</form>
+</body>
+</html>
