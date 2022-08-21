@@ -1,4 +1,3 @@
-from bs4 import element
 from flask import Flask, render_template, request
 from tradingview_ta import *
 
@@ -8,7 +7,6 @@ with open('KUCOIN_BINANCE_HUOBI.txt') as f:
 app = Flask(__name__)
 line_list =  []
 rsi_list = []
-element = {}
 @app.route('/snapshot')
 def snapshot():
     return {
@@ -17,7 +15,7 @@ def snapshot():
 @app.route('/', methods=['GET', 'POST'])
 def hoursStore():
     return render_template('index.html', Hourss=["15m", "1h", "4h", "1D", "1W", "1M"])
-@app.route('/list', methods=['POST', 'GET'])
+@app.route('/list', methods=['GET', 'POST'])
 def Scan():
     dir = {}
     get = request.form.get("saatler")
@@ -56,7 +54,6 @@ def Scan():
                         print('bolinger band genişliği', BBW)
                         print('----------------------------------------------------------')
                         line_list.append(key)
-                        element={key: rsi}
         except (TypeError):
             print(key + " Bu şekilde bir parametre yok")
         except (ZeroDivisionError):
