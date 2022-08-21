@@ -40,7 +40,7 @@ def Scan():
                 upper = value.indicators["BB.upper"]
                 BBW = (upper - lower) / sma
                 conditions = (
-                        BBW > (float)(bbw)
+                        BBW < (float)(bbw)
                 )
                 if BBW and ema50 and rsi:
                     if (conditions):
