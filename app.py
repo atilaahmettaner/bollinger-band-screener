@@ -12,6 +12,7 @@ def snapshot():
     return {
         "code": "success"
     }
+
 @app.route('/', methods=['GET', 'POST'])
 def hoursStore():
     return render_template('index.html', Hourss=["15m", "1h", "4h", "1D", "1W", "1M"])
