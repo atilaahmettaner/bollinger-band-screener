@@ -7,12 +7,6 @@ with open('KUCOIN_BINANCE_HUOBI.txt') as f:
 app = Flask(__name__)
 line_list =  []
 rsi_list = []
-@app.route('/snapshot')
-def snapshot():
-    return {
-        "code": "success"
-    }
-
 @app.route('/', methods=['GET', 'POST'])
 def hoursStore():
     return render_template('index.html', Hourss=["15m", "1h", "4h", "1D", "1W", "1M"])
@@ -23,7 +17,7 @@ def Scan():
     hours = get
     bbw = request.form['bbw']
     a = hours.strip()
-    print(bbw)
+
     analysis = get_multiple_analysis(screener="crypto", interval=a, symbols=line)
     for key, value in analysis.items():
         try:
@@ -51,14 +45,12 @@ def Scan():
                         dir = {
                             exchange: coin,
                         }
-                        print("coin ismi: " ,key)
-                        print('bolinger band genişliği', BBW)
-                        print('----------------------------------------------------------')
+
                         line_list.append(key)
         except (TypeError):
-            print(key + " Bu şekilde bir parametre yok")
+            k = 1
         except (ZeroDivisionError):
-            print(key + " bu coin 0 a bolunuyor")
+            k=2
     return render_template('data.html', line_list=line_list, hours=hours, dir=dir, rsi_list=rsi_list)
 @app.errorhandler(404)
 def pageNotFound(error):
