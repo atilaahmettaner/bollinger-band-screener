@@ -1,4 +1,4 @@
 # CryptoScanner
 flask and python 
-Bolinger band scanner webapp
-https://atilaahmettaner.github.io/CryptoScanner/
+Bolinger band scanner
+https://crypto-scanner-app.herokuapp.com/
