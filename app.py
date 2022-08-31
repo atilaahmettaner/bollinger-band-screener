@@ -26,7 +26,6 @@ def Scan():
                 macd = value.indicators["MACD.macd"]
                 rsi = value.indicators["RSI"]
                 sma = value.indicators["SMA20"]
-                stoch_rsi = value.indicators["Stoch.RSI.K"]
                 ema20 = value.indicators["EMA20"]
                 ema50 = value.indicators["EMA50"]
                 ema200 = value.indicators["EMA200"]
