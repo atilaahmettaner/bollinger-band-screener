@@ -5,8 +5,6 @@ with open('KUCOIN_BINANCE_HUOBI.txt') as f:
     line = lines.split('\n')
 app = Flask(__name__)
 line_list =[]
-rsi_list = []
-lsi=[]
 @app.route('/', methods=['GET', 'POST'])
 def hoursStore():
     return render_template('index.html', Hourss=["15m", "1h", "4h", "1D", "1W", "1M"])
@@ -52,7 +50,7 @@ def Scan():
             k = 1
         except (ZeroDivisionError):
             k=0
-    return render_template('data.html', line_list=line_list, hours=hours, dir=dir, rsi_list=rsi_list)
+    return render_template('data.html', line_list=line_list, hours=hours)
 @app.errorhandler(404)
 def pageNotFound(error):
     return render_template('error.html')
