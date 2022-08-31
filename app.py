@@ -1,12 +1,12 @@
 from flask import Flask, render_template, request
 from tradingview_ta import *
-
 with open('KUCOIN_BINANCE_HUOBI.txt') as f:
     lines = f.read()
     line = lines.split('\n')
 app = Flask(__name__)
-line_list =  []
+line_list =[]
 rsi_list = []
+lsi=[]
 @app.route('/', methods=['GET', 'POST'])
 def hoursStore():
     return render_template('index.html', Hourss=["15m", "1h", "4h", "1D", "1W", "1M"])
@@ -17,11 +17,12 @@ def Scan():
     hours = get
     bbw = request.form['bbw']
     a = hours.strip()
-
     analysis = get_multiple_analysis(screener="crypto", interval=a, symbols=line)
-    for key, value in analysis.items():
+    for key, value  in analysis.items():
         try:
+
             if value != None:
+
                 open = value.indicators["open"]
                 close = value.indicators["close"]
                 macd = value.indicators["MACD.macd"]
@@ -40,20 +41,18 @@ def Scan():
                 if BBW and ema50 and rsi:
                     if (conditions):
                         currency = key.split(":")
-                        exchange = currency[0]
                         coin = currency[1]
+                        exchange = currency[0]
+                        element = {key: BBW}
                         dir = {
                             exchange: coin,
                         }
-
-                        line_list.append(key)
+                        line_list.append(element)
         except (TypeError):
             k = 1
         except (ZeroDivisionError):
-            k=2
+            k=0
     return render_template('data.html', line_list=line_list, hours=hours, dir=dir, rsi_list=rsi_list)
 @app.errorhandler(404)
 def pageNotFound(error):
     return render_template('error.html')
-
-

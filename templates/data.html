@@ -18,19 +18,24 @@
 <div style="width: 60%; margin: 0 auto;">
     <div style="display: flex; justify-content: space-between;">
         <h3>Borsa-coin</h3>
-        <h3>rsi</h3>
+        <h3>Bolinger Band Width</h3>
         <h3>grafik</h3>
     </div>
-    {% for coin  in line_list %}
+    {% for dict_item   in line_list %}
+        {% for coin,value  in dict_item.items() %}
+
  <div style="display: flex; justify-content: space-between;">
             {% set coins  =coin.split(':') %}
             <a onclick=location.href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}">
-                {{ coin }}
+                {{ coins[1] }}
             </a>
+                <a>
+                    {{value }}
+                </a>
             <a> <img src="https://www.coingecko.com/coins/4/sparkline" ></a>
         </div>
-    {% endfor %}
+          {% endfor %}
+     {% endfor %}
 </div>
 </body>
-
 </html>
