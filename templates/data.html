@@ -15,8 +15,9 @@
         window.history.back();
     }
 </script>
-<div style="width: 60%; margin: 0 auto;">
-    <div style="display: flex; justify-content: space-between;">
+<div style="width: 100%; margin: 0 auto;">
+    <div  style="display: flex; justify-content: space-between;">
+        <h3>image</h3>
         <h3>Borsa-coin</h3>
         <h3>Bolinger Band Width</h3>
         <h3>grafik</h3>
@@ -24,14 +25,19 @@
     {% for dict_item   in line_list %}
         {% for coin,value  in dict_item.items() %}
 
- <div style="display: flex; justify-content: space-between;">
+ <div style="display: flex; justify-content: space-between; height: 70px; background: darkslateblue;border:  none;
+    border-bottom:    1px solid black;">
+
             {% set coins  =coin.split(':') %}
-            <a onclick=location.href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}">
+            {% set coin_name=coins[1][:-4] %}
+     <a ><img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC{{ coin_name }}--big.svg" alt="" style=" border-radius:50%" ></a>
+            <a onclick=location.href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}" ,target="_blank">
                 {{ coins[1] }}
             </a>
                 <a>
+
                     {{value }}
-                </a>
+                  </a>
             <a> <img src="https://www.coingecko.com/coins/4/sparkline" ></a>
         </div>
           {% endfor %}
