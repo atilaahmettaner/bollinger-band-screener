@@ -1,8 +1,6 @@
 from flask import Flask, render_template, request
 from tradingview_ta import *
-import pywhatkit
-import pymongo
-from pymongo import MongoClient
+
 with open('KUCOIN_BINANCE_HUOBI.txt') as f:
     lines = f.read()
     line = lines.split('\n')

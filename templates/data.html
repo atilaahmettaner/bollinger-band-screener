@@ -24,10 +24,8 @@
     </div>
     {% for dict_item   in line_list %}
         {% for coin,value  in dict_item.items() %}
-
- <div style="display: flex; justify-content: space-between; height: 70px; background: darkslateblue;border:  none;
+ <div style="display: flex; justify-content: space-between; height: 70px; background: darkslategray ;border:  none;
     border-bottom:    1px solid black;">
-
             {% set coins  =coin.split(':') %}
             {% set coin_name=coins[1][:-4] %}
      <a ><img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC{{ coin_name }}--big.svg" alt="" style=" border-radius:50%" ></a>
@@ -35,7 +33,6 @@
                 {{ coins[1] }}
             </a>
                 <a>
-
                     {{value }}
                   </a>
             <a> <img src="https://www.coingecko.com/coins/4/sparkline" ></a>
