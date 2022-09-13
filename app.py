@@ -15,6 +15,7 @@ class crypto:
 line_list =[]
 line_list1 =[]
 data={}
+element = {}
 @app.route('/', methods=['GET', 'POST'])
 def hoursStore():
     return render_template('index.html', Hourss=["15m", "1h", "4h", "1D", "1W", "1M"])
@@ -25,12 +26,14 @@ def Scan():
     hours = get
     bbw = request.form['bbw']
     a = hours.strip()
+
     analysis = get_multiple_analysis(screener="crypto", interval=a, symbols=line)
     for key, value  in analysis.items():
         try:
             if value != None:
                 open = value.indicators["open"]
                 close = value.indicators["close"]
+                change = value.indicators["change"]
                 macd = value.indicators["MACD.macd"]
                 rsi = value.indicators["RSI"]
                 sma = value.indicators["SMA20"]
@@ -48,21 +51,22 @@ def Scan():
                         currency = key.split(":")
                         coin = currency[1]
                         exchange = currency[0]
-                        element = {key: BBW}
-                        dir = {
-                            exchange: coin,
-                        }
+                        price=round(close,4)
+                        BBW=round(BBW,4)
+                        change=round(change,3)
+                        element[key] = [price, BBW,change ]
 
-                        line_list.append(element)
-                        line_list1.append(crypto(key, BBW,rsi))
-                        for i in line_list1:
-                            print()
         except (TypeError):
             k = 1
         except (ZeroDivisionError):
             k=0
-    return render_template('data.html', line_list=line_list, hours=hours, line_list1=line_list1 )
+    line_list.append(element)
+    print(line_list)
+    return render_template('data.html', line_list=line_list, hours=hours, line_list1=line_list1,element=element )
+
 @app.errorhandler(404)
 def pageNotFound(error):
     return render_template('error.html')
+
+
 
