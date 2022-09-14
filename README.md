@@ -1,5 +1,6 @@
 # CryptoScanner
 [![GitHub stars](https://img.shields.io/github/stars/atilaahmettaner/CryptoScanner)](https://github.com/atilaahmettaner/CryptoScanner/stargazers)
+
 flask and python 
 Bolinger band scanner
 https://crypto-scanner-app.herokuapp.com/
