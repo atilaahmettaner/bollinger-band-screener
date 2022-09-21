@@ -5,22 +5,29 @@ with open('KUCOIN_BINANCE_HUOBI.txt') as f:
     lines = f.read()
     line = lines.split('\n')
 
-
 app = Flask(__name__)
+
+
 class crypto:
- def __init__(self,coinName,BBW_value,rsi_value):
-    self.coinName =coinName
-    self.BBW_value=BBW_value
-    self.rsi_value=rsi_value
-line_list =[]
-line_list1 =[]
-data={}
+    def __init__(self, coinName, BBW_value, rsi_value):
+        self.coinName = coinName
+        self.BBW_value = BBW_value
+        self.rsi_value = rsi_value
+
+
+line_list = []
+line_list1 = []
+data = {}
 element = {}
 element.clear()
 line_list.clear()
+
+
 @app.route('/', methods=['GET', 'POST'])
 def hoursStore():
-    return render_template('index.html', Hourss=["5m","15m", "1h", "4h", "1D", "1W", "1M"])
+    return render_template('index.html', Hourss=["5m", "15m", "1h", "4h", "1D", "1W", "1M"])
+
+
 @app.route('/list', methods=['GET', 'POST'])
 def Scan():
     element.clear()
@@ -31,10 +38,10 @@ def Scan():
     a = hours.strip()
     scantype = request.form['scantype']
     print(scantype)
-    scan=int(float(scantype))
+    scan = int(float(scantype))
     print(type(scan))
     analysis = get_multiple_analysis(screener="crypto", interval=a, symbols=line)
-    for key, value  in analysis.items():
+    for key, value in analysis.items():
         try:
             if value != None:
                 open = value.indicators["open"]
@@ -51,28 +58,26 @@ def Scan():
 
                 BBW = (upper - lower) / sma
                 conditions = (
-                        1 >BBW and BBW < float(bbw)
+                        1 > BBW and BBW < float(bbw)
                 )
                 if BBW and ema50 and rsi:
                     if (conditions):
                         currency = key.split(":")
                         coin = currency[1]
                         exchange = currency[0]
-                        price=round(close,4)
-                        BBW=round(BBW,4)
-                        change=round(change,3)
-                        element[key] = [price, BBW,change ]
+                        price = round(close, 4)
+                        BBW = round(BBW, 4)
+                        change = round(change, 3)
+                        element[key] = [price, BBW, change]
         except (TypeError):
             k = 1
         except (ZeroDivisionError):
-            k=0
+            k = 0
     line_list.append(element)
 
-    return render_template('data.html', line_list=line_list, hours=hours, line_list1=line_list1,element=element )
+    return render_template('data.html', line_list=line_list, hours=hours, line_list1=line_list1, element=element)
+
 
 @app.errorhandler(404)
 def pageNotFound(error):
     return render_template('error.html')
-
-
-

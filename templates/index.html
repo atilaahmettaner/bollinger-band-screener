@@ -5,26 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Demo for the tradingview-ta Python package.">
 </head>
-<body >
+<body>
 <h1>Crypto Market Scanner</h1>
 <p>{{ hours_time }}</p>
 <form action="list" method="POST">
     <select name="saatler">
         <option value="15m">-- Saat dilimini şeçiniz --</option>
-            {% for hour in Hourss %}
+        {% for hour in Hourss %}
             <option value=" {{ hour }} ">{{ hour }}</option>
         {% endfor %}
     </select>
     <select name="scantype">
         <option value="0.15">bolinger band darlığı</option>
-            <option value="0.05">çok dar</option>
-            <option value="0.15">dar</option>
-            <option value="0.50">geniş</option>
+        <option value="0.05">çok dar</option>
+        <option value="0.15">dar</option>
+        <option value="0.50">geniş</option>
     </select>
-     <input type="number" name="bbw" step="0.001" placeholder="bbw">
+    <input type="number" name="bbw" step="0.001" placeholder="bbw">
     <input type="submit" value="Scan"/>
 </form>
 <script src="https://widgets.coingecko.com/coingecko-coin-price-marquee-widget.js"></script>
-<coingecko-coin-price-marquee-widget  coin-ids="bitcoin,ethereum,algorand,polkadot,solana" currency="usd" background-color="#202b38" locale="en" font-color="#dbdbdb"></coingecko-coin-price-marquee-widget>
+<coingecko-coin-price-marquee-widget coin-ids="bitcoin,ethereum,algorand,polkadot,solana" currency="usd"
+                                     background-color="#202b38" locale="en"
+                                     font-color="#dbdbdb"></coingecko-coin-price-marquee-widget>
 </body>
 </html>

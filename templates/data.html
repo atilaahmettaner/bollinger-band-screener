@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
-   <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
+    <link rel="stylesheet" href="styles.css">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Demo for the tradingview-ta Python package.">
 </head>
-<body >
+<body>
 <h2 align="center"> {{ hours }} diliminde bulunan coinler</h2>
 <button onclick="goBack()">Go Back</button>
 <script>
@@ -17,35 +17,36 @@
     }
 </script>
 <table class="paleBlueRows" style="height: 95px;" width="381">
-  <thead>
-  <tr>
-      <th>image</th>
-    <th>Borsa-coin</th>
-    <th>Bolinger Band Width</th>
-    <th>price</th>
-    <th>change</th>
-  </tr>
-  </thead>
+    <thead>
+    <tr>
+        <th>image</th>
+        <th>Borsa-coin</th>
+        <th>Bolinger Band Width</th>
+        <th>price</th>
+        <th>change</th>
+    </tr>
+    </thead>
     {% for dict_item   in line_list %}
         {% for coin,value  in dict_item.items() %}
- <tbody>
-  <tr>
-      {% set coins  =coin.split(':') %}
-            {% set coin_name=coins[1][:-4] %}
-    <td><img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC{{ coin_name}}.svg" alt="" height=50 width=50 style=" border-radius:50%;" ></td>
-    <td >
-        <a href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}">
-    <div style="height:100%;width:100%">
-           {{ coins[1]  }}
-    </div>
-  </a>
-    <td>{{value[1] }}</td>
-    <td>{{ value[0]}}</td>
-    <td>%{{ value[2]}}</td>
-  </tr>
-  </tbody>
-          {% endfor %}
-     {% endfor %}
+            <tbody>
+            <tr>
+                {% set coins  =coin.split(':') %}
+                {% set coin_name=coins[1][:-4] %}
+                <td><img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC{{ coin_name }}.svg" alt="" height=50
+                         width=50 style=" border-radius:50%;"></td>
+                <td>
+                    <a href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}">
+                        <div style="height:100%;width:100%">
+                            {{ coins[1] }}
+                        </div>
+                    </a>
+                <td>{{ value[1] }}</td>
+                <td>{{ value[0] }}</td>
+                <td>%{{ value[2] }}</td>
+            </tr>
+            </tbody>
+        {% endfor %}
+    {% endfor %}
 </table>
 </body>
 </html>
