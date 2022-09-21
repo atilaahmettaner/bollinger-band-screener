@@ -64,7 +64,6 @@ def Scan():
                         BBW=round(BBW,4)
                         change=round(change,3)
                         element[key] = [price, BBW,change ]
-
         except (TypeError):
             k = 1
         except (ZeroDivisionError):
