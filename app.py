@@ -27,7 +27,6 @@ def Scan():
     line_list.clear()
     dir = {}
     hours = request.form.get("saatler")
-
     bbw = request.form['bbw']
     a = hours.strip()
     scantype = request.form['scantype']
