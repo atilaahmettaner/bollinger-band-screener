@@ -33,7 +33,6 @@ def Scan():
     print(scantype)
     scan=int(float(scantype))
     print(type(scan))
-
     analysis = get_multiple_analysis(screener="crypto", interval=a, symbols=line)
     for key, value  in analysis.items():
         try:
