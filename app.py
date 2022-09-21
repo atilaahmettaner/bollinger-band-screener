@@ -16,16 +16,24 @@ line_list =[]
 line_list1 =[]
 data={}
 element = {}
+element.clear()
+line_list.clear()
 @app.route('/', methods=['GET', 'POST'])
 def hoursStore():
-    return render_template('index.html', Hourss=["15m", "1h", "4h", "1D", "1W", "1M"])
+    return render_template('index.html', Hourss=["5m","15m", "1h", "4h", "1D", "1W", "1M"])
 @app.route('/list', methods=['GET', 'POST'])
 def Scan():
+    element.clear()
+    line_list.clear()
     dir = {}
-    get = request.form.get("saatler")
-    hours = get
+    hours = request.form.get("saatler")
+
     bbw = request.form['bbw']
     a = hours.strip()
+    scantype = request.form['scantype']
+    print(scantype)
+    scan=int(float(scantype))
+    print(type(scan))
 
     analysis = get_multiple_analysis(screener="crypto", interval=a, symbols=line)
     for key, value  in analysis.items():
@@ -42,9 +50,10 @@ def Scan():
                 ema200 = value.indicators["EMA200"]
                 lower = value.indicators["BB.lower"]
                 upper = value.indicators["BB.upper"]
+
                 BBW = (upper - lower) / sma
                 conditions = (
-                        BBW < (float)(bbw)
+                        1 >BBW and BBW < float(bbw)
                 )
                 if BBW and ema50 and rsi:
                     if (conditions):
@@ -61,7 +70,7 @@ def Scan():
         except (ZeroDivisionError):
             k=0
     line_list.append(element)
-    print(line_list)
+
     return render_template('data.html', line_list=line_list, hours=hours, line_list1=line_list1,element=element )
 
 @app.errorhandler(404)
