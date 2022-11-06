@@ -9,7 +9,7 @@
     <meta name="description" content="Demo for the tradingview-ta Python package.">
 </head>
 <body>
-<h2 align="center"> {{ hours }} diliminde bulunan coinler</h2>
+<h2 align="center"> Coins filtered in 1h time frame</h2>
 <button onclick="goBack()">Go Back</button>
 <script>
     function goBack() {
@@ -19,7 +19,7 @@
 <table class="paleBlueRows" style="height: 95px;" width="381">
     <thead>
     <tr>
-        <th>image</th>
+        <th>symbol</th>
         <th>Borsa-coin</th>
         <th>Bolinger Band Width</th>
         <th>price</th>
@@ -32,8 +32,8 @@
             <tr>
                 {% set coins  =coin.split(':') %}
                 {% set coin_name=coins[1][:-4] %}
-                <td><img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC{{ coin_name }}.svg" alt="" height=50
-                         width=50 style=" border-radius:50%;"></td>
+                <td><img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC{{ coin_name }}.svg" height=50
+                         width=50 style=" border-radius:50%;">
                 <td>
                     <a href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}">
                         <div style="height:100%;width:100%">

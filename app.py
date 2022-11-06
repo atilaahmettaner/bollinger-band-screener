@@ -22,7 +22,6 @@ element = {}
 element.clear()
 line_list.clear()
 
-
 @app.route('/', methods=['GET', 'POST'])
 def hoursStore():
     return render_template('index.html', Hourss=["5m", "15m", "1h", "4h", "1D", "1W", "1M"])
@@ -46,7 +45,9 @@ def Scan():
             if value != None:
                 open = value.indicators["open"]
                 close = value.indicators["close"]
-                change = value.indicators["change"]
+
+                change = ((close-open)/open)*100
+                print(change)
                 macd = value.indicators["MACD.macd"]
                 rsi = value.indicators["RSI"]
                 sma = value.indicators["SMA20"]
@@ -70,9 +71,9 @@ def Scan():
                         change = round(change, 3)
                         element[key] = [price, BBW, change]
         except (TypeError):
-            k = 1
+            print(key ," is not defined ")
         except (ZeroDivisionError):
-            k = 0
+            print(key," bbw value the is zero")
     line_list.append(element)
 
     return render_template('data.html', line_list=line_list, hours=hours, line_list1=line_list1, element=element)

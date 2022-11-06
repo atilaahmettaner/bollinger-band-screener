@@ -10,16 +10,16 @@
 <p>{{ hours_time }}</p>
 <form action="list" method="POST">
     <select name="saatler">
-        <option value="15m">-- Saat dilimini şeçiniz --</option>
+        <option value="15m">-- select time period --</option>
         {% for hour in Hourss %}
             <option value=" {{ hour }} ">{{ hour }}</option>
         {% endfor %}
     </select>
     <select name="scantype">
-        <option value="0.15">bolinger band darlığı</option>
-        <option value="0.05">çok dar</option>
-        <option value="0.15">dar</option>
-        <option value="0.50">geniş</option>
+        <option value="0.15">bolinger band witdh</option>
+        <option value="0.05">too narrow</option>
+        <option value="0.15">narrow</option>
+        <option value="0.50">wide</option>
     </select>
     <input type="number" name="bbw" step="0.001" placeholder="bbw">
     <input type="submit" value="Scan"/>
