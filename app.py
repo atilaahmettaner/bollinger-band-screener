@@ -4,14 +4,12 @@ from tradingview_ta import *
 with open('KUCOIN_BINANCE_HUOBI.txt') as f:
     lines = f.read()
     line = lines.split('\n')
-
 app = Flask(__name__)
 
-
-class crypto:
-    def __init__(self, coinName, BBW_value, rsi_value):
+class Crypto:
+    def __init__(self, coinName, bbw_value, rsi_value):
         self.coinName = coinName
-        self.BBW_value = BBW_value
+        self.bbw_value = bbw_value
         self.rsi_value = rsi_value
 
 
@@ -23,22 +21,18 @@ element.clear()
 line_list.clear()
 
 @app.route('/', methods=['GET', 'POST'])
-def hoursStore():
+def hours_store():
     return render_template('index.html', Hourss=["5m", "15m", "1h", "4h", "1D", "1W", "1M"])
 
 
 @app.route('/list', methods=['GET', 'POST'])
-def Scan():
+def scan():
     element.clear()
     line_list.clear()
-    dir = {}
     hours = request.form.get("saatler")
     bbw = request.form['bbw']
     a = hours.strip()
     scantype = request.form['scantype']
-    print(scantype)
-    scan = int(float(scantype))
-    print(type(scan))
     analysis = get_multiple_analysis(screener="crypto", interval=a, symbols=line)
     for key, value in analysis.items():
         try:
@@ -64,8 +58,6 @@ def Scan():
                 if BBW and ema50 and rsi:
                     if (conditions):
                         currency = key.split(":")
-                        coin = currency[1]
-                        exchange = currency[0]
                         price = round(close, 4)
                         BBW = round(BBW, 4)
                         change = round(change, 3)
