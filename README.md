@@ -13,8 +13,6 @@ The value to be entered in the Bollinger Band indicator varies depending on the 
    
    
    https://crypto-scanner-app.herokuapp.com/
-![image](https://user-images.githubusercontent.com/67838093/231182454-3bc4de80-37f0-475e-99b5-c53b4c94c39e.png)
  <img src=“https://user-images.githubusercontent.com/67838093/231182454-3bc4de80-37f0-475e-99b5-c53b4c94c39e.png” width=“300” height=“200”>
 
-![image](https://user-images.githubusercontent.com/67838093/205168192-3630a8f1-9f37-485b-8b20-6ae07631dfab.png)
-
+<img src=“https://user-images.githubusercontent.com/67838093/205168192-3630a8f1-9f37-485b-8b20-6ae07631dfab.png” width=“300” height=“200”>
