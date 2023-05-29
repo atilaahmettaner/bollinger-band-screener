@@ -1,5 +1,6 @@
 # Bolinger Band Screener 
 [![GitHub stars](https://img.shields.io/github/stars/atilaahmettaner/CryptoScanner)](https://github.com/atilaahmettaner/CryptoScanner/stargazers)
+
 [![HitCount](https://hits.dwyl.com/atilaahmettaner/bollinger-band-screener.svg?style=flat&show=unique)](http://hits.dwyl.com/atilaahmettaner/bollinger-band-screener)
  The Bollinger Band indicator is a technical analysis tool used to identify potential price breakouts or breakdowns. By entering the correct value in the tool, you can find coins with tight prices that are about to rise.
 
@@ -14,6 +15,6 @@ The value to be entered in the Bollinger Band indicator varies depending on the 
    
    https://crypto-scanner-app.herokuapp.com/
    
-![Main Page](https://user-images.githubusercontent.com/67838093/231182454-3bc4de80-37f0-475e-99b5-c53b4c94c39e.png)
+![Main Page](https://github.com/atilaahmettaner/bollinger-band-screener/assets/67838093/68a2a133-0ab8-40ae-8145-4fd876b8bd1a)
 
-![Listing Page](https://user-images.githubusercontent.com/67838093/205168192-3630a8f1-9f37-485b-8b20-6ae07631dfab.png)
+![Listing Page](https://github.com/atilaahmettaner/bollinger-band-screener/assets/67838093/7bc975f8-cbfc-485c-a4ec-7fac8269d114)
