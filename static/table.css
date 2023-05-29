@@ -1,0 +1,40 @@
+  .info-box {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            color: #000000;
+            background-color: #000000;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+        }
+
+        .info-box table {
+            width: 100%;
+        }
+
+        .info-box th, .info-box td {
+            text-align: left;
+            padding: 10px;
+        }
+        .paleBlueRows,
+        .paleBlueRows th,
+        .paleBlueRows td,
+        .paleBlueRows tr {
+            background-color: #171924 !important;
+        }
+            .dataTables_length select {
+        height: 30px;
+        width: 75px;
+            }
+
+
+
+     .dataTables_length select option {
+        background-color: #483636;
+    }
+      label {
+        color: #f6f3f3 !important;
+    }
+.paleBlueRows tr {
+        border-bottom: 1px solid #000000; /* alt çerçeve */
+    }

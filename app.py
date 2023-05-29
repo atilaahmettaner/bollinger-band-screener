@@ -31,9 +31,9 @@ def scan():
     line_list.clear()
     hours = request.form.get("saatler")
     bbw = request.form['bbw']
-    a = hours.strip()
-    scantype = request.form['scantype']
-    analysis = get_multiple_analysis(screener="crypto", interval=a, symbols=line)
+    striphours = hours.strip()
+
+    analysis = get_multiple_analysis(screener="crypto", interval=striphours, symbols=line)
     for key, value in analysis.items():
         try:
             if value != None:

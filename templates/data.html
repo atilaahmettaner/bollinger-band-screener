@@ -3,50 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/table.css">
+
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Scan cryptocurrencies by Bollinger bandwidth in one click. Browse coins integrated with TradingView. Just the tool you need in bull season. find the coins that will rise in advance.">
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
+
 </head>
 <body>
-<h2 align="center"> Coins filtered in 1h time frame</h2>
+<h2 align="center" style="  font-weight: bold;  "> Coins filtered in {{ hours }} time frame</h2>
 <button onclick="goBack()">Go Back</button>
-<script>
-    function goBack() {
-        window.history.back();
-    }
-</script>
-<table class="paleBlueRows" style="height: 95px;" width="381">
+
+<table id="coinsTable" class="paleBlueRows" style="height: 95px;   background-color: #1d1d26; " width="381" >
     <thead>
     <tr>
         <th>symbol</th>
-        <th>exchange-coin</th>
-        <th>Bolinger Band Width</th>
+        <th>Coin </th>
+        <th>Bollinger Width</th>
         <th>price</th>
-        <th>change</th>
+        <th>% change</th>
     </tr>
     </thead>
-    {% for dict_item   in line_list %}
-        {% for coin,value  in dict_item.items() %}
-            <tbody>
+    <tbody>
+    {% for dict_item in line_list %}
+        {% for coin, value in dict_item.items() %}
             <tr>
-                {% set coins  =coin.split(':') %}
-                {% set coin_name=coins[1][:-4] %}
-                <td><img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC{{ coin_name }}.svg" height=50
-                         width=50 style=" border-radius:50%;">
+                {% set coins = coin.split(':') %}
+                {% set coin_name = coins[1][:-4] %}
+                <td><img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC{{ coin_name }}.svg" height=30
+                         width=30 style=" border-radius:50%;">
+                </td>
                 <td>
                     <a href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}">
                         <div style="height:100%;width:100%">
                             {{ coins[1] }}
                         </div>
                     </a>
+                </td>
                 <td>{{ value[1] }}</td>
                 <td>{{ value[0] }}</td>
                 <td>%{{ value[2] }}</td>
             </tr>
-            </tbody>
         {% endfor %}
     {% endfor %}
+    </tbody>
 </table>
+
+<!-- jQuery Library -->
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- DataTables Script -->
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.js"></script>
+<script>
+$(document).ready( function () {
+    var table = $('#coinsTable').DataTable({
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        "displayLength": 25,
+        "language": {
+            "lengthMenu": "_MENU_",
+        },
+        "drawCallback": function(settings) {
+            $('.paginate_button').css({
+                'color': '#ffffff',  /* Değişmesini istediğiniz renk */
+                'font-weight': 'bold',  /* Yazı tipini kalınlaştırır */
+                'font-size': '16px'  /* Yazı boyutunu artırır */
+            });
+        }
+    });
+});
+</script>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+
+    $(document).ready( function () {
+        $('#coinsTable').DataTable();
+    } );
+</script>
+
 </body>
 </html>

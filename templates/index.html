@@ -1,9 +1,11 @@
 <html>
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
+    <link rel="stylesheet" href="/static/table.css">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Demo for the tradingview-ta Python package.">
+    <meta name="description" content="easilyscan 1800 coin by bolinger band ">
+
 </head>
 <body>
 <a class="github-button" href="https://github.com/atilaahmettaner/bollinger-band-screener" data-color-scheme="no-preference: dark_dimmed; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" aria-label="Star atilaahmettaner/bollinger-band-screener on GitHub">Star on Github</a>
@@ -12,25 +14,46 @@
 <p>{{ hours_time }}</p>
 <form action="list" method="POST">
     <select name="saatler">
-        <option value="15m">-- select time period --</option>
+        <option value="4h">  select time period  </option>
         {% for hour in Hourss %}
             <option value=" {{ hour }} ">{{ hour }}</option>
         {% endfor %}
     </select>
-    <select name="scantype">
-        <option value="0.15">bolinger band witdh</option>
-        <option value="0.05">too narrow</option>
-        <option value="0.15">narrow</option>
-        <option value="0.50">wide</option>
-    </select>
+
     <input type="number" name="bbw" step="0.001" placeholder="bbw" id="bbw" required="required">
     <input type="submit" value="Scan"/>
 </form>
+
+    <div class="info-box">
+        <h2>Scanning Guide</h2>
+        <table>
+            <tr>
+                <th>Scan Duration</th>
+                <th>BBW Value</th>
+            </tr>
+            <tr>
+                <td>1-Day</td>
+                <td>0.12</td>
+            </tr>
+            <tr>
+                <td>4-Hour</td>
+                <td>0.04</td>
+            </tr>
+            <tr>
+                <td>1-Hour</td>
+                <td>0.02</td>
+            </tr>
+            <tr>
+                <td>15-Minutes</td>
+                <td>0.08</td>
+            </tr>
+        </table>
+    </div>
+
 </script>
 <script src="https://widgets.coingecko.com/coingecko-coin-price-marquee-widget.js"></script>
 <coingecko-coin-price-marquee-widget coin-ids="bitcoin,ethereum,algorand,polkadot,solana" currency="usd"
                                      background-color="#202b38" locale="en"
                                      font-color="#dbdbdb"></coingecko-coin-price-marquee-widget>
-
 </body>
 </html>
