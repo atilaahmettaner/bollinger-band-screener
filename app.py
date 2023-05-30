@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from tradingview_ta import *
-
+import os
 with open('KUCOIN_BINANCE_HUOBI.txt') as f:
     lines = f.read()
     line = lines.split('\n')
@@ -74,3 +74,6 @@ def scan():
 @app.errorhandler(404)
 def pageNotFound(error):
     return render_template('error.html')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

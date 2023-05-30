@@ -9,11 +9,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Scan cryptocurrencies by Bollinger bandwidth in one click. Browse coins integrated with TradingView. Just the tool you need in bull season. find the coins that will rise in advance.">
 
-    <!-- DataTables CSS -->
+
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
 
 </head>
 <body>
+
 <h2 align="center" style="  font-weight: bold;  "> Coins filtered in {{ hours }} time frame</h2>
 <button onclick="goBack()">Go Back</button>
 
@@ -37,7 +38,7 @@
                          width=30 style=" border-radius:50%;">
                 </td>
                 <td>
-                    <a href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}">
+                   <a href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}" target="_blank">
                         <div style="height:100%;width:100%">
                             {{ coins[1] }}
                         </div>
@@ -67,9 +68,9 @@ $(document).ready( function () {
         },
         "drawCallback": function(settings) {
             $('.paginate_button').css({
-                'color': '#ffffff',  /* Değişmesini istediğiniz renk */
-                'font-weight': 'bold',  /* Yazı tipini kalınlaştırır */
-                'font-size': '16px'  /* Yazı boyutunu artırır */
+                'color': '#ffffff',
+                'font-weight': 'bold',
+                'font-size': '16px'
             });
         }
     });
@@ -85,6 +86,6 @@ $(document).ready( function () {
         $('#coinsTable').DataTable();
     } );
 </script>
-
+{% extends "base.html" %}
 </body>
 </html>

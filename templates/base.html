@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DQL2SYE20X"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-DQL2SYE20X');
+    </script>
+
+</head>
+<body>
+    {% block content %}
+    {% endblock %}
+</body>
+</html>
