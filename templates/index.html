@@ -13,13 +13,22 @@
 <h1>Crypto Market Scanner</h1>
 <p>{{ hours_time }}</p>
 <form action="list" method="POST">
-    <select name="saatler">
-        <option value="4h">  select time period  </option>
+    <select name="times">
         {% for hour in Hourss %}
             <option value=" {{ hour }} ">{{ hour }}</option>
         {% endfor %}
     </select>
-
+     <select name="exchange">
+            <option value="binance">Binance</option>
+            <option value="all">All</option>
+            <option value="huobi">Huobi</option>
+            <option value="kucoin">Kucoin</option>
+             <option value="coinbase">Coinbase</option>
+             <option value="gateio">Gateio</option>
+            <option value="bitfinex">Bitfinex</option>
+            <option value="bybit">Bybit</option>
+            <option value="okx">Okx</option>
+        </select>
     <input type="number" name="bbw" step="0.001" placeholder="bbw" id="bbw" required="required">
     <input type="submit" value="Scan"/>
 </form>
@@ -29,7 +38,7 @@
         <table>
             <tr>
                 <th>Scan Duration</th>
-                <th>BBW Value</th>
+                <th>Optimal BBW Value</th>
             </tr>
             <tr>
                 <td>1-Day</td>
@@ -45,7 +54,7 @@
             </tr>
             <tr>
                 <td>15-Minutes</td>
-                <td>0.08</td>
+                <td>0.008</td>
             </tr>
         </table>
     </div>

@@ -1,17 +1,9 @@
 from flask import Flask, render_template, request
 from tradingview_ta import *
 import os
-with open('KUCOIN_BINANCE_HUOBI.txt') as f:
-    lines = f.read()
-    line = lines.split('\n')
+
 app = Flask(__name__)
-
-class Crypto:
-    def __init__(self, coinName, bbw_value, rsi_value):
-        self.coinName = coinName
-        self.bbw_value = bbw_value
-        self.rsi_value = rsi_value
-
+file_dir='coinlist'
 
 line_list = []
 line_list1 = []
@@ -22,26 +14,31 @@ line_list.clear()
 
 @app.route('/', methods=['GET', 'POST'])
 def hours_store():
-    return render_template('index.html', Hourss=["5m", "15m", "1h", "4h", "1D", "1W", "1M"])
+    return render_template('index.html', Hourss=["4h","5m" ,"15m", "1h" , "1D", "1W", "1M"])
 
 
 @app.route('/list', methods=['GET', 'POST'])
 def scan():
     element.clear()
     line_list.clear()
-    hours = request.form.get("saatler")
+    hours = request.form.get("times")
     bbw = request.form['bbw']
+    exchange= request.form['exchange']
     striphours = hours.strip()
+    stripexchange = exchange.strip()
+    exchange_file = os.path.join(file_dir, f"{stripexchange}.txt")
+    with open(exchange_file) as file:
+        lines = file.read()
+        line = lines.split('\n')
 
     analysis = get_multiple_analysis(screener="crypto", interval=striphours, symbols=line)
     for key, value in analysis.items():
         try:
             if value != None:
-                open = value.indicators["open"]
+                open_price = value.indicators["open"]
                 close = value.indicators["close"]
 
-                change = ((close-open)/open)*100
-                print(change)
+                change = ((close-open_price)/open_price)*100
                 macd = value.indicators["MACD.macd"]
                 rsi = value.indicators["RSI"]
                 sma = value.indicators["SMA20"]
