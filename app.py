@@ -117,8 +117,9 @@ def check_auth_header(request):
 @app.before_request
 def before_request():
     if request.endpoint != 'handle_list_request':
-        if not check_auth_header(request):
-            return jsonify({'error': 'Unauthorized access'}), 401
+        return
+    if not check_auth_header(request):
+        return jsonify({'error': 'Unauthorized access'}), 401
 
 
 
