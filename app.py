@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from tradingview_ta import *
 import os
 
@@ -66,6 +66,61 @@ def scan():
     line_list.append(element)
 
     return render_template('data.html', line_list=line_list, hours=hours, line_list1=line_list1, element=element)
+
+
+@app.route('/getPrice', methods=['POST'])
+def handle_list_request():
+    request_data = request.json
+    hours = request_data.get('hours')
+    symbol = request_data.get('symbol')
+    exchange = request_data.get('exchange')
+    scanForApi(hours, symbol, exchange)
+    return jsonify(element)
+
+
+
+
+def scanForApi(hours, symbol, exchange):
+    element.clear()
+    striphours = hours.strip()
+    symbol_with_exchange = f"{exchange}:{symbol}"
+    if exchange == "kucoin":
+        analysis = get_multiple_analysis(screener="crypto", interval=striphours, symbols=[symbol_with_exchange])
+    elif exchange == "bist":
+        analysis = get_multiple_analysis(screener="turkey", interval=striphours, symbols=[symbol_with_exchange])
+
+    for key, value in analysis.items():
+        try:
+            if value is not None:
+                open_price = value.indicators["open"]
+                close = value.indicators["close"]
+                change = ((close - open_price) / open_price) * 100
+                price = round(close, 4)
+                change = round(change, 3)
+                element["name"] = key
+                element["current"] = price
+                element["change"] = change
+                element["open"] = open_price
+                element["close"] = close
+
+        except TypeError:
+            print(key, " is not defined ")
+
+
+API_KEY = "c29d28e35cd02672bd295c4c5f52eccb"
+def check_auth_header(request):
+    auth_header = request.headers.get('Authorization')
+    if auth_header==API_KEY:
+        return True
+    return False
+
+@app.before_request
+def before_request():
+    if request.endpoint != 'handle_list_request':
+        return
+    if not check_auth_header(request):
+        return jsonify({'error': 'Unauthorized access'}), 401
+
 
 
 @app.errorhandler(404)

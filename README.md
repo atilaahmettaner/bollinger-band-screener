@@ -35,6 +35,21 @@ Go to the project directory
 ```
 
 ## Run Docker
+
+With Makefile
+
+Run:
+
+```bash
+  make run
+```
+Rerun:
+
+```bash
+  make rerun
+```
+Another Way
+
 Before the project can be run with Docker, a Docker image must be created. You can use the following constraint for this:
 ```bash
   docker build -t cryptoscreener .
@@ -43,4 +58,5 @@ Run docker on localhost:5000
  ```bash
   docker run -d -p 5000:5000 cryptoscreener
 ```
+
 Go to to http://localhost:5000
