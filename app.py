@@ -30,8 +30,22 @@ def scan():
     with open(exchange_file) as file:
         lines = file.read()
         line = lines.split('\n')
+        exchange_screener_mapping = {
+        "all": "crypto",
+        "huobi": "crypto",
+        "kucoin": "crypto",
+        "coinbase": "crypto",
+        "gateio": "crypto",
+        "binance": "crypto",
+        "bitfinex": "crypto",
+        "bybit": "crypto",
+        "okx": "crypto",
+        "bist": "turkey",
+        "nasdaq": "america",
+          }
+    screener = exchange_screener_mapping.get(stripexchange, "crypto")
 
-    analysis = get_multiple_analysis(screener="crypto", interval=striphours, symbols=line)
+    analysis = get_multiple_analysis(screener=screener, interval=striphours, symbols=line)
     for key, value in analysis.items():
         try:
             if value != None:
@@ -88,7 +102,8 @@ def scanForApi(hours, symbol, exchange):
         analysis = get_multiple_analysis(screener="crypto", interval=striphours, symbols=[symbol_with_exchange])
     elif exchange == "bist":
         analysis = get_multiple_analysis(screener="turkey", interval=striphours, symbols=[symbol_with_exchange])
-
+    elif exchange == "nasdaq":
+        analysis = get_multiple_analysis(screener="america", interval=striphours, symbols=[symbol_with_exchange])
     for key, value in analysis.items():
         try:
             if value is not None:
