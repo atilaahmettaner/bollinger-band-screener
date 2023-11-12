@@ -20,7 +20,7 @@
     </select>
     <select id="marketType" name="marketType">
         <option value="crypto">Crypto</option>
-        <option value="Stock">Hisse</option>
+        <option value="stock">Stock</option>
     </select>
     <select id="exchange" name="exchange">
         
@@ -34,8 +34,8 @@
     var exchange = document.getElementById('exchange');
 
     var exchanges = {
-        crypto: ['all', 'huobi', 'kucoin', 'coinbase', 'gateio', 'binance', 'bitfinex', 'bybit', 'okx'],
-        hisse: ['nasdaq', 'bist']
+        crypto: ['binance', 'huobi','all', 'kucoin', 'coinbase', 'gateio',  'bitfinex', 'bybit', 'okx'],
+        stock: ['nasdaq', 'bist']
     };
 
     function setExchanges() {
