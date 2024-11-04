@@ -1,9 +1,18 @@
 from flask import Flask, render_template, request, jsonify
 from tradingview_ta import *
 import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 app = Flask(__name__)
 file_dir='coinlist'
+
+
+API_KEY = os.getenv('API_KEY')
+if not API_KEY:
+    raise ValueError("API_KEY not found in environment variables")
 
 line_list = []
 line_list1 = []
@@ -23,7 +32,7 @@ def scan():
     line_list.clear()
     hours = request.form.get("times")
     bbw = request.form['bbw']
-    exchange= request.form['exchange']
+    exchange = request.form['exchange']
     striphours = hours.strip()
     stripexchange = exchange.strip()
     exchange_file = os.path.join(file_dir, f"{stripexchange}.txt")
@@ -31,18 +40,18 @@ def scan():
         lines = file.read()
         line = lines.split('\n')
         exchange_screener_mapping = {
-        "all": "crypto",
-        "huobi": "crypto",
-        "kucoin": "crypto",
-        "coinbase": "crypto",
-        "gateio": "crypto",
-        "binance": "crypto",
-        "bitfinex": "crypto",
-        "bybit": "crypto",
-        "okx": "crypto",
-        "bist": "turkey",
-        "nasdaq": "america",
-          }
+            "all": "crypto",
+            "huobi": "crypto",
+            "kucoin": "crypto",
+            "coinbase": "crypto",
+            "gateio": "crypto",
+            "binance": "crypto",
+            "bitfinex": "crypto",
+            "bybit": "crypto",
+            "okx": "crypto",
+            "bist": "turkey",
+            "nasdaq": "america",
+        }
     screener = exchange_screener_mapping.get(stripexchange, "crypto")
 
     analysis = get_multiple_analysis(screener=screener, interval=striphours, symbols=line)
@@ -51,34 +60,51 @@ def scan():
             if value != None:
                 open_price = value.indicators["open"]
                 close = value.indicators["close"]
-
                 change = ((close-open_price)/open_price)*100
-                macd = value.indicators["MACD.macd"]
-                rsi = value.indicators["RSI"]
                 sma = value.indicators["SMA20"]
-                ema20 = value.indicators["EMA20"]
-                ema50 = value.indicators["EMA50"]
-                ema200 = value.indicators["EMA200"]
-                lower = value.indicators["BB.lower"]
-                upper = value.indicators["BB.upper"]
+                bb_upper = value.indicators["BB.upper"]
+                bb_lower = value.indicators["BB.lower"]
+                bb_middle = sma
+                bb_upper_1 = bb_middle + ((bb_upper - bb_middle) / 2)
+                bb_lower_1 = bb_middle - ((bb_middle - bb_lower) / 2)
+                BBW = (bb_upper - bb_lower) / sma
+                rating = 0
+                if close > bb_upper:
+                    rating = 3
+                elif close > bb_upper_1:
+                    rating = 2
+                elif close > bb_middle:
+                    rating = 1
+                elif close < bb_lower:
+                    rating = -3
+                elif close < bb_lower_1:
+                    rating = -2
+                elif close < bb_middle:
+                    rating = -1
+                signal = "NEUTRAL"
+                if rating == 2:
+                    signal = "BUY"
+                elif rating == -2:
+                    signal = "SELL"
 
-                BBW = (upper - lower) / sma
                 conditions = (
-                        1 > BBW and BBW < float(bbw)
+                    1 > BBW and BBW < float(bbw)
                 )
-                if BBW and ema50 and rsi:
+                
+                if BBW and value.indicators["EMA50"] and value.indicators["RSI"]:
                     if (conditions):
                         currency = key.split(":")
                         price = round(close, 4)
                         BBW = round(BBW, 4)
                         change = round(change, 3)
-                        element[key] = [price, BBW, change]
+                        element[key] = [price, BBW, change, rating, signal]
+                        
         except (TypeError):
             print(key ," is not defined ")
         except (ZeroDivisionError):
             print(key," bbw value the is zero")
+    
     line_list.append(element)
-
     return render_template('data.html', line_list=line_list, hours=hours, line_list1=line_list1, element=element)
 
 
@@ -122,10 +148,9 @@ def scanForApi(hours, symbol, exchange):
             print(key, " is not defined ")
 
 
-API_KEY = "c29d28e35cd02672bd295c4c5f52eccb"
 def check_auth_header(request):
     auth_header = request.headers.get('Authorization')
-    if auth_header==API_KEY:
+    if auth_header == API_KEY:
         return True
     return False
 

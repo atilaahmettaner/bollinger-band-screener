@@ -1,0 +1,30 @@
+/* Dashboard özellikleri */
+.dashboard-header {
+    background: var(--secondary-bg);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card {
+    background: var(--secondary-bg);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.back-button {
+    background: var(--accent-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: white;
+    transition: all 0.3s;
+}
+
+.back-button:hover {
+    transform: translateX(-5px);
+    box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
+} 

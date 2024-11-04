@@ -2,90 +2,363 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
-    <link rel="stylesheet" href="/static/table.css">
-
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Scan cryptocurrencies by Bollinger bandwidth in one click. Browse coins integrated with TradingView. Just the tool you need in bull season. find the coins that will rise in advance.">
+    <title>Crypto Scanner Pro</title>
+    
+ 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
 
+    <style>
+        :root {
+            --primary-bg: #1a1a2e;
+            --secondary-bg: #16213e;
+            --accent-color: #4CAF50;
+            --text-color: #e1e1e1;
+        }
+        
+        body {
+            background: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .dashboard-header {
+            background: var(--secondary-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .coin-card {
+            background: var(--secondary-bg);
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .coin-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .dataTables_wrapper {
+            background: var(--secondary-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        table.dataTable {
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+        
+        .dataTable tr {
+            background: var(--secondary-bg);
+            border-radius: 8px;
+        }
+        
+        .dataTable td {
+            padding: 15px !important;
+            vertical-align: middle;
+        }
+        
+        .signal-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .signal-buy {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+        
+        .signal-sell {
+            background: rgba(244, 67, 54, 0.2);
+            color: #F44336;
+        }
+        
+        .signal-neutral {
+            background: rgba(158, 158, 158, 0.2);
+            color: #9E9E9E;
+        }
+        
+        .stats-card {
+            background: var(--secondary-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .back-button {
+            background: var(--accent-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .back-button:hover {
+            transform: translateX(-5px);
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
+        }
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
-
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 10px;
+            }
+            
+            .stats-card {
+                margin: 5px 0;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<h2 align="center" style="  font-weight: bold;  "> Coins filtered in {{ hours }} time frame</h2>
-<button onclick="goBack()">Go Back</button>
+<div class="container-fluid">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2><i class="fas fa-chart-line"></i> Crypto Scanner Pro</h2>
+                <p class="text-muted">{{ hours }} Timeframe Analysis</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <button class="back-button" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+            </div>
+        </div>
+    </div>
 
-<table id="coinsTable" class="paleBlueRows" style="height: 95px;   background-color: #1d1d26; " width="381" >
-    <thead>
-    <tr>
-        <th>symbol</th>
-        <th>Coin </th>
-        <th>Bollinger Width</th>
-        <th>price</th>
-        <th>% change</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for dict_item in line_list %}
-        {% for coin, value in dict_item.items() %}
-            <tr>
-                {% set coins = coin.split(':') %}
-                {% set coin_name = coins[1][:-4] %}
-                <td><img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC{{ coin_name }}.svg" height=30
-                         width=30 style=" border-radius:50%;">
-                </td>
-                <td>
-                   <a href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}" target="_blank">
-                        <div style="height:100%;width:100%">
-                            {{ coins[1] }}
-                        </div>
-                    </a>
-                </td>
-                <td>{{ value[1] }}</td>
-                <td>{{ value[0] }}</td>
-                <td>%{{ value[2] }}</td>
-            </tr>
-        {% endfor %}
-    {% endfor %}
-    </tbody>
-</table>
 
-<!-- jQuery Library -->
-<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-signal fa-2x mb-2"></i>
+                <h4>Total Signals</h4>
+                <h3 id="totalSignals">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-arrow-up fa-2x mb-2 text-success"></i>
+                <h4>Buy Signals</h4>
+                <h3 id="buySignals">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-arrow-down fa-2x mb-2 text-danger"></i>
+                <h4>Sell Signals</h4>
+                <h3 id="sellSignals">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-clock fa-2x mb-2"></i>
+                <h4>Last Update</h4>
+                <h3 id="lastUpdate">Just Now</h3>
+            </div>
+        </div>
+    </div>
 
-<!-- DataTables Script -->
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.js"></script>
+
+    <div class="table-responsive">
+        <table id="coinsTable" class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Coin</th>
+                    <th>BB Width</th>
+                    <th>Price</th>
+                    <th>Change %</th>
+                    <th>BB Rating</th>
+                    <th>Signal</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dict_item in line_list %}
+                    {% for coin, value in dict_item.items() %}
+                        <tr>
+                            {% set coins = coin.split(':') %}
+                            {% set coin_name = coins[1][:-4] %}
+                            <td>
+                                <img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC{{ coin_name }}.svg" 
+                                     height="30" width="30" class="rounded-circle" 
+                            </td>
+                            <td>
+                                <a href="http://www.tradingview.com/chart/?symbol={{ coins[0] }}%3A{{ coins[1] }}" 
+                                   target="_blank" class="text-decoration-none">
+                                    {{ coins[1] }}
+                                </a>
+                            </td>
+                            <td>{{ value[1] }}</td>
+                            <td>${{ value[0] }}</td>
+                            <td class="{{ 'text-success' if value[2] > 0 else 'text-danger' }}">
+                                {{ value[2] }}%
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar {{ 'bg-success' if value[3] > 0 else 'bg-danger' }}" 
+                                         role="progressbar" 
+                                         style="width: {{ (value[3]|abs/3)*100 }}%">
+                                        {{ value[3] }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="signal-badge {{ 'signal-buy' if value[4] == 'BUY' else 'signal-sell' if value[4] == 'SELL' else 'signal-neutral' }}">
+                                    {{ value[4] }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="showCoinDetails('{{ coins[1] }}')">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" onclick="addToWatchlist('{{ coins[1] }}')">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-$(document).ready( function () {
+$(document).ready(function() {
+
     var table = $('#coinsTable').DataTable({
-        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-        "displayLength": 25,
-        "language": {
-            "lengthMenu": "_MENU_",
+        pageLength: 25,
+        order: [[4, 'desc']],
+        dom: '<"row"<"col-md-6"l><"col-md-6"f>>rtip',
+        language: {
+            search: "_INPUT_",
+            searchPlaceholder: "Search coins..."
         },
-        "drawCallback": function(settings) {
-            $('.paginate_button').css({
-                'color': '#ffffff',
-                'font-weight': 'bold',
-                'font-size': '16px'
-            });
+        responsive: true,
+        initComplete: function() {
+            updateStats();
         }
     });
+
+
+    $('.dataTables_filter input').unbind()
+    $('.dataTables_filter input').bind('keyup', function(e) {
+        table.search(this.value).draw();
+        updateStats();
+    });
+    
+
+    setInterval(function() {
+        location.reload();
+    }, 300000);
+});
+
+
+function updateStats() {
+    const rows = $('#coinsTable').DataTable().rows({search: 'applied'}).data();
+    let buyCount = 0;
+    let sellCount = 0;
+    
+    rows.each(function(value) {
+        if(value[6].includes('BUY')) buyCount++;
+        if(value[6].includes('SELL')) sellCount++;
+    });
+    
+    $('#totalSignals').text(rows.length);
+    $('#buySignals').text(buyCount);
+    $('#sellSignals').text(sellCount);
+}
+
+function goBack() {
+    window.history.back();
+}
+
+function showCoinDetails(coin) {
+    Swal.fire({
+        title: coin + ' Details',
+        html: `
+            <div class="text-start">
+                <p><strong>Market Cap:</strong> Loading...</p>
+                <p><strong>24h Volume:</strong> Loading...</p>
+                <p><strong>All-Time High:</strong> Loading...</p>
+            </div>
+        `,
+        showCloseButton: true,
+        showConfirmButton: false
+    });
+    
+}
+
+function addToWatchlist(coin) {
+    let watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    
+    if(watchlist.includes(coin)) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Already in Watchlist',
+            text: coin + ' is already in your watchlist!',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    } else {
+        watchlist.push(coin);
+        localStorage.setItem('watchlist', JSON.stringify(watchlist));
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Added to Watchlist',
+            text: coin + ' has been added to your watchlist!',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+}
+
+window.addEventListener('beforeunload', function() {
+    document.body.innerHTML += `
+        <div class="loading-overlay">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
 });
 </script>
 
-<script>
-    function goBack() {
-        window.history.back();
-    }
-
-    $(document).ready( function () {
-        $('#coinsTable').DataTable();
-    } );
-</script>
-{% extends "base.html" %}
 </body>
 </html>
