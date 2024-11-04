@@ -1,0 +1,14 @@
+/* Responsive tasarım */
+@media (max-width: 768px) {
+    .dashboard-header {
+        padding: 10px;
+    }
+    
+    .stats-card {
+        margin: 5px 0;
+    }
+    
+    .dataTables_wrapper {
+        padding: 10px;
+    }
+} 

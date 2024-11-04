@@ -1,0 +1,83 @@
+/* Table Styles */
+.data-table {
+    width: 100%;
+    background: var(--secondary-bg);
+    border-radius: 1rem;
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1rem 0;
+}
+
+.data-table th {
+    background: var(--secondary-bg);
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table tbody tr {
+    transition: all 0.2s;
+}
+
+.data-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+/* Search and Pagination */
+.dataTables_wrapper {
+    padding: 1rem;
+    background: var(--secondary-bg);
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dataTables_filter input {
+    background: var(--primary-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.dataTables_length select {
+    background: var(--primary-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.dataTables_length select option {
+    background-color: #483636;
+}
+
+label {
+    color: #f6f3f3 !important;
+}
+
+.paleBlueRows tr {
+    border-bottom: 1px solid #000000;
+}
+
+/* Tablo container'ı için ek stiller */
+.table-container {
+    background: var(--secondary-bg);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.coin-details {
+    text-align: left;
+    padding: 15px;
+} 

@@ -1,0 +1,84 @@
+/* Stats Cards */
+.stats-card {
+    background: var(--secondary-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.stats-card:hover {
+    transform: translateY(-4px);
+}
+
+.stats-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--accent-color);
+}
+
+.stats-title {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.stats-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Signal Badges */
+.signal-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.signal-buy {
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--success-color);
+}
+
+.signal-sell {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--danger-color);
+}
+
+/* Price Change */
+.price-change {
+    font-weight: 500;
+}
+
+.price-up {
+    color: var(--success-color);
+}
+
+.price-down {
+    color: var(--danger-color);
+}
+
+/* Coin Logo */
+.coin-logo {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+/* Action Buttons */
+.action-btn {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+} 
