@@ -6,7 +6,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from flask import Flask, render_template, request, jsonify
+from tradingview_ta import *
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 app = Flask(__name__)
+file_dir = 'coinlist'
+
+# Heroku specific configuration
+port = int(os.environ.get("PORT", 5000))
+
+# Error handling
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Unhandled exception: {str(e)}")
+    return jsonify({"error": "Internal server error"}), 500
 file_dir='coinlist'
 
 
