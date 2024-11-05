@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from tradingview_ta import *
+from tradingview_ta import TA_Handler, get_multiple_analysis
 import os
 
 app = Flask(__name__)
@@ -12,7 +12,6 @@ element = {}
 element.clear()
 line_list.clear()
 
-API_KEY = "c29d28e35cd02672bd295c4c5f5x2eccb"
 
 @app.route('/', methods=['GET', 'POST'])
 def hours_store():
@@ -135,6 +134,7 @@ def scanForApi(hours, symbol, exchange):
         except TypeError:
             print(key, " is not defined ")
 
+API_KEY = "c29d28e35cd02672bd295c4c5f5x2eccb"
 def check_auth_header(request):
     auth_header = request.headers.get('Authorization')
     if auth_header == API_KEY:
