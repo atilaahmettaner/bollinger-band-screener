@@ -1,36 +1,9 @@
 from flask import Flask, render_template, request, jsonify
 from tradingview_ta import *
 import os
-from dotenv import load_dotenv
-
-
-load_dotenv()
-
-from flask import Flask, render_template, request, jsonify
-from tradingview_ta import *
-import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 app = Flask(__name__)
-file_dir = 'coinlist'
-
-# Heroku specific configuration
-port = int(os.environ.get("PORT", 5000))
-
-# Error handling
-@app.errorhandler(Exception)
-def handle_exception(e):
-    app.logger.error(f"Unhandled exception: {str(e)}")
-    return jsonify({"error": "Internal server error"}), 500
 file_dir='coinlist'
-
-
-API_KEY = os.getenv('API_KEY')
-if not API_KEY:
-    raise ValueError("API_KEY not found in environment variables")
 
 line_list = []
 line_list1 = []
@@ -39,10 +12,11 @@ element = {}
 element.clear()
 line_list.clear()
 
+API_KEY = "c29d28e35cd02672bd295c4c5f5x2eccb"
+
 @app.route('/', methods=['GET', 'POST'])
 def hours_store():
     return render_template('index.html', Hourss=["4h","5m" ,"15m", "1h" , "1D", "1W", "1M"])
-
 
 @app.route('/list', methods=['GET', 'POST'])
 def scan():
@@ -125,7 +99,6 @@ def scan():
     line_list.append(element)
     return render_template('data.html', line_list=line_list, hours=hours, line_list1=line_list1, element=element)
 
-
 @app.route('/getPrice', methods=['POST'])
 def handle_list_request():
     request_data = request.json
@@ -134,9 +107,6 @@ def handle_list_request():
     exchange = request_data.get('exchange')
     scanForApi(hours, symbol, exchange)
     return jsonify(element)
-
-
-
 
 def scanForApi(hours, symbol, exchange):
     element.clear()
@@ -165,7 +135,6 @@ def scanForApi(hours, symbol, exchange):
         except TypeError:
             print(key, " is not defined ")
 
-
 def check_auth_header(request):
     auth_header = request.headers.get('Authorization')
     if auth_header == API_KEY:
@@ -178,8 +147,6 @@ def before_request():
         return
     if not check_auth_header(request):
         return jsonify({'error': 'Unauthorized access'}), 401
-
-
 
 @app.errorhandler(404)
 def pageNotFound(error):
