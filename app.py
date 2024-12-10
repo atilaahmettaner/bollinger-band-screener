@@ -134,19 +134,7 @@ def scanForApi(hours, symbol, exchange):
         except TypeError:
             print(key, " is not defined ")
 
-API_KEY = "c29d28e35cd02672bd295c4c5f5x2eccb"
-def check_auth_header(request):
-    auth_header = request.headers.get('Authorization')
-    if auth_header == API_KEY:
-        return True
-    return False
 
-@app.before_request
-def before_request():
-    if request.endpoint != 'handle_list_request':
-        return
-    if not check_auth_header(request):
-        return jsonify({'error': 'Unauthorized access'}), 401
 
 @app.errorhandler(404)
 def pageNotFound(error):
