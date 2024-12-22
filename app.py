@@ -140,14 +140,11 @@ def scanForApi(hours, symbol, exchange):
         except TypeError:
             print(key, " is not defined ")
 
-<<<<<<< HEAD
-=======
 def check_auth_header(request):
     auth_header = request.headers.get('Authorization') 
     if auth_header == API_KEY:
         return True
     return False
->>>>>>> temp-branch
 
 
 @app.errorhandler(404)
