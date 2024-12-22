@@ -1,6 +1,12 @@
 from flask import Flask, render_template, request, jsonify
 from tradingview_ta import TA_Handler, get_multiple_analysis
 import os
+from dotenv import load_dotenv
+
+load_dotenv()  # .env dosyasını yükle
+
+# API_KEY'i .env dosyasından al
+API_KEY = os.getenv('API_KEY')
 
 app = Flask(__name__)
 file_dir='coinlist'
@@ -134,11 +140,100 @@ def scanForApi(hours, symbol, exchange):
         except TypeError:
             print(key, " is not defined ")
 
+<<<<<<< HEAD
+=======
+def check_auth_header(request):
+    auth_header = request.headers.get('Authorization') 
+    if auth_header == API_KEY:
+        return True
+    return False
+>>>>>>> temp-branch
 
 
 @app.errorhandler(404)
 def pageNotFound(error):
     return render_template('error.html')
+
+@app.route('/api/scan', methods=['POST'])
+def scan_api():
+    try:
+        request_data = request.json
+        hours = request_data.get('hours', '4h')  # Default 4h
+        bbw = request_data.get('bbw', '0.04')   # Default 0.04
+        exchange = request_data.get('exchange', 'binance')  # Default binance
+        
+        if not check_auth_header(request):
+            return jsonify({'error': 'Unauthorized access'}), 401
+
+        element.clear()
+        line_list.clear()
+        
+        striphours = hours.strip()
+        stripexchange = exchange.strip()
+        
+        exchange_file = os.path.join(file_dir, f"{stripexchange}.txt")
+        
+        with open(exchange_file) as file:
+            lines = file.read()
+            line = lines.split('\n')
+            
+        exchange_screener_mapping = {
+            "all": "crypto",
+            "huobi": "crypto", 
+            "kucoin": "crypto",
+            "coinbase": "crypto",
+            "gateio": "crypto",
+            "binance": "crypto",
+            "bitfinex": "crypto",
+            "bybit": "crypto",
+            "okx": "crypto",
+            "bist": "turkey",
+            "nasdaq": "america"
+        }
+        
+        screener = exchange_screener_mapping.get(stripexchange, "crypto")
+        analysis = get_multiple_analysis(screener=screener, interval=striphours, symbols=line)
+        
+        result = []
+        
+        for key, value in analysis.items():
+            try:
+                if value is not None:
+                    open_price = value.indicators["open"]
+                    close = value.indicators["close"]
+                    change = ((close-open_price)/open_price)*100
+                    sma = value.indicators["SMA20"]
+                    bb_upper = value.indicators["BB.upper"]
+                    bb_lower = value.indicators["BB.lower"]
+                    bb_middle = sma
+                    BBW = (bb_upper - bb_lower) / sma
+                    
+                    if BBW and value.indicators["EMA50"] and value.indicators["RSI"]:
+                        if 1 > BBW and BBW < float(bbw):
+                            result.append({
+                                "symbol": key,
+                                "price": round(close, 4),
+                                "bbw": round(BBW, 4),
+                                "change": round(change, 3),
+                                "rsi": value.indicators["RSI"],
+                                "volume": value.indicators["volume"]
+                            })
+                            
+            except (TypeError, ZeroDivisionError) as e:
+                continue
+                
+        return jsonify({
+            "status": "success",
+            "timeframe": hours,
+            "exchange": exchange,
+            "data": result
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
