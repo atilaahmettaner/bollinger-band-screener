@@ -143,7 +143,17 @@
         <div class="row align-items-center">
             <div class="col-md-6">
                 <h2><i class="fas fa-chart-line"></i> Crypto Scanner Pro</h2>
-                <p class="text-muted">{{ hours }} Timeframe Analysis</p>
+                <p class="text-muted">
+                    {% if request.path == '/trending' %}
+                        {% if filter_type == "rating" %}
+                            KuCoin {{ page_title }} Rating - {{ hours }} Timeframe
+                        {% else %}
+                            KuCoin Top Gainers - {{ hours }} Timeframe
+                        {% endif %}
+                    {% else %}
+                        {{ hours }} Timeframe Analysis
+                    {% endif %}
+                </p>
             </div>
             <div class="col-md-6 text-end">
                 <button class="back-button" onclick="goBack()">
@@ -239,7 +249,7 @@
                                 <button class="btn btn-sm btn-outline-primary" onclick="showCoinDetails('{{ coins[1] }}')">
                                     <i class="fas fa-info-circle"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-success" onclick="addToWatchlist('{{ coins[1] }}')">
+                                <button class="btn btn-sm btn-outline-success favorite-btn" onclick="addToWatchlist('{{ coins[1] }}')" id="fav-{{ coins[1] }}">
                                     <i class="fas fa-star"></i>
                                 </button>
                             </td>
@@ -272,6 +282,7 @@ $(document).ready(function() {
         responsive: true,
         initComplete: function() {
             updateStats();
+            highlightFavorites();
         }
     });
 
@@ -288,6 +299,18 @@ $(document).ready(function() {
     }, 300000);
 });
 
+// Highlight favorited coins
+function highlightFavorites() {
+    let watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    
+    // Check each favorite button and update its appearance
+    $('.favorite-btn').each(function() {
+        let coinId = this.id.replace('fav-', '');
+        if(watchlist.includes(coinId)) {
+            $(this).removeClass('btn-outline-success').addClass('btn-success');
+        }
+    });
+}
 
 function updateStats() {
     const rows = $('#coinsTable').DataTable().rows({search: 'applied'}).data();
@@ -326,23 +349,41 @@ function showCoinDetails(coin) {
 
 function addToWatchlist(coin) {
     let watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    let favBtn = document.getElementById('fav-' + coin);
     
     if(watchlist.includes(coin)) {
+        // Remove from watchlist if already present
+        watchlist = watchlist.filter(item => item !== coin);
+        localStorage.setItem('watchlist', JSON.stringify(watchlist));
+        
+        // Update button appearance
+        if(favBtn) {
+            favBtn.classList.remove('btn-success');
+            favBtn.classList.add('btn-outline-success');
+        }
+        
         Swal.fire({
             icon: 'info',
-            title: 'Already in Watchlist',
-            text: coin + ' is already in your watchlist!',
+            title: 'Favorilerden Kaldırıldı',
+            text: coin + ' favori listenizden kaldırıldı!',
             timer: 2000,
             showConfirmButton: false
         });
     } else {
+        // Add to watchlist
         watchlist.push(coin);
         localStorage.setItem('watchlist', JSON.stringify(watchlist));
         
+        // Update button appearance
+        if(favBtn) {
+            favBtn.classList.remove('btn-outline-success');
+            favBtn.classList.add('btn-success');
+        }
+        
         Swal.fire({
             icon: 'success',
-            title: 'Added to Watchlist',
-            text: coin + ' has been added to your watchlist!',
+            title: 'Favorilere Eklendi',
+            text: coin + ' favori listenize eklendi!',
             timer: 2000,
             showConfirmButton: false
         });

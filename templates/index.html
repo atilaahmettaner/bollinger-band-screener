@@ -3,9 +3,28 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
     <link rel="stylesheet" href="/static/table.css">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="easily scan 1800 coin by bollinger band ">
-
+    <style>
+        .trending-buttons {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .trending-btn {
+            padding: 10px 15px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .trending-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
 <a class="github-button" href="https://github.com/atilaahmettaner/bollinger-band-screener" data-color-scheme="no-preference: dark_dimmed; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" aria-label="Star atilaahmettaner/bollinger-band-screener on GitHub">Star on Github</a>
@@ -28,6 +47,57 @@
     <input type="number" name="bbw" step="0.001" placeholder="bbw" id="bbw" required="required">
     <input type="submit" value="Scan"/>
 </form>
+
+<!-- New trending buttons section -->
+<div class="trending-buttons">
+    <h2>Trending Coins</h2>
+    <form action="trending" method="POST">
+        <input type="hidden" name="exchange" value="kucoin">
+        <div style="margin-bottom: 10px;">
+            <button type="submit" name="timeframe" value="5m" class="trending-btn">Top Gainers (5min)</button>
+            <button type="submit" name="timeframe" value="15m" class="trending-btn">Top Gainers (15min)</button>
+        </div>
+        <div>
+            <button type="submit" name="timeframe" value="1h" class="trending-btn" style="background-color: #3F51B5;">Top Gainers (1h)</button>
+            <button type="submit" name="timeframe" value="4h" class="trending-btn" style="background-color: #673AB7;">Top Gainers (4h)</button>
+            <button type="submit" name="timeframe" value="1D" class="trending-btn" style="background-color: #9C27B0;">Top Gainers (1D)</button>
+        </div>
+    </form>
+    <a href="/favorites" class="trending-btn" style="display: inline-block; margin-top: 10px; text-decoration: none; background-color: #FF9800;">
+        <i class="fas fa-star"></i> Favorilerim
+    </a>
+    <div id="favoriteCount" style="display: inline-block; margin-left: 10px; font-size: 0.9em;">
+        <!-- Will be populated by JS -->
+    </div>
+</div>
+
+<!-- BB Rating Filter Buttons -->
+<div class="trending-buttons">
+    <h2>Filter by BB Rating (KuCoin)</h2>
+    <div style="margin-bottom: 15px;">
+        <span style="color: white; margin-right: 10px;">Timeframe:</span>
+        <select id="bbRatingTimeframe" onchange="updateBBRatingTimeframe()" style="padding: 5px; border-radius: 5px; background-color: #16213e; color: white; border: 1px solid #444;">
+            <option value="15m">15 Minutes</option>
+            <option value="5m">5 Minutes</option>
+            <option value="1h">1 Hour</option>
+            <option value="4h">4 Hours</option>
+            <option value="1D">1 Day</option>
+        </select>
+    </div>
+    <form action="trending" method="POST" id="bbRatingForm">
+        <input type="hidden" name="exchange" value="kucoin">
+        <input type="hidden" name="filter_type" value="rating">
+        <input type="hidden" name="timeframe" value="15m" id="selectedTimeframe">
+        <div class="rating-buttons">
+            <button type="submit" name="rating" value="3" class="trending-btn" style="background-color: #4CAF50;">Strong Buy (+3)</button>
+            <button type="submit" name="rating" value="2" class="trending-btn" style="background-color: #8BC34A;">Buy (+2)</button>
+            <button type="submit" name="rating" value="1" class="trending-btn" style="background-color: #CDDC39;">Weak Buy (+1)</button>
+            <button type="submit" name="rating" value="-1" class="trending-btn" style="background-color: #FFC107;">Weak Sell (-1)</button>
+            <button type="submit" name="rating" value="-2" class="trending-btn" style="background-color: #FF9800;">Sell (-2)</button>
+            <button type="submit" name="rating" value="-3" class="trending-btn" style="background-color: #F44336;">Strong Sell (-3)</button>
+        </div>
+    </form>
+</div>
 
 <script>
     var marketType = document.getElementById('marketType');
@@ -58,6 +128,23 @@
 
     
     marketType.addEventListener('change', setExchanges);
+    
+    // Display favorite count on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        let watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+        let favoriteCount = document.getElementById('favoriteCount');
+        
+        if (watchlist.length > 0) {
+            favoriteCount.innerHTML = `(${watchlist.length})`;
+        }
+    });
+    
+    // Update BB Rating timeframe
+    function updateBBRatingTimeframe() {
+        var timeframeSelect = document.getElementById('bbRatingTimeframe');
+        var selectedTimeframe = document.getElementById('selectedTimeframe');
+        selectedTimeframe.value = timeframeSelect.value;
+    }
 </script>
 
     
