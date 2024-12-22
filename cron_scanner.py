@@ -157,16 +157,77 @@ def send_email(subject, html_content):
         print(f"Failed to send email: {e}")
         return False
 
+def get_fear_greed_index():
+    """Fear & Greed Index'i alternative.me API'sinden al"""
+    try:
+        response = requests.get('https://api.alternative.me/fng/')
+        data = response.json()
+        
+        if data['metadata']['error'] is None:
+            # En son değeri al
+            latest = data['data'][0]
+            
+            # Fear & Greed değeri ve sınıflandırması
+            value = latest['value']
+            classification = latest['value_classification']
+            timestamp = latest['timestamp']
+            
+            return {
+                'value': value,
+                'classification': classification,
+                'timestamp': timestamp,
+                'success': True
+            }
+    except Exception as e:
+        print(f"Fear & Greed Index hatası: {e}")
+    
+    return {'success': False}
+
+def format_fear_greed_html(fear_greed_data):
+    """Fear & Greed Index HTML formatla"""
+    if not fear_greed_data['success']:
+        return "<p>Fear & Greed Index verisi alınamadı.</p>"
+    
+    # Fear & Greed renk kodu belirle
+    value = int(fear_greed_data['value'])
+    
+    # Renk gradyan hesapla (Kırmızı: Aşırı Korku - Yeşil: Aşırı Açgözlülük)
+    if value <= 25:  # Korku veya Aşırı Korku
+        color = f"rgb(255, {value * 10}, 0)"
+    elif value <= 50:  # Nötr'e yakın
+        green_value = (value - 25) * 10
+        color = f"rgb(255, {200 - green_value}, 0)"
+    else:  # Açgözlülük veya Aşırı Açgözlülük
+        red_value = 255 - ((value - 50) * 5)
+        color = f"rgb({red_value}, 200, 0)"
+    
+    html = f"""
+    <div style="background-color: #f9f9f9; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: center;">
+        <h3>Fear & Greed Index</h3>
+        <div style="display: inline-block; width: 150px; height: 150px; border-radius: 50%; background-color: {color}; 
+                    line-height: 150px; color: white; font-size: 40px; font-weight: bold; margin: 10px;">
+            {value}
+        </div>
+        <p style="font-size: 20px; font-weight: bold; margin: 10px;">{fear_greed_data['classification']}</p>
+        <p style="color: #666; font-size: 14px;">Güncellenme: {fear_greed_data['timestamp']}</p>
+    </div>
+    """
+    
+    return html
+
 def main():
     """Main function to run the scan and send email"""
     # Zaman dilimlerini büyük harfle tanımla
     scan_configs = [
-        {'timeframe': '4H', 'bbw': '0.05', 'exchange': 'kucoin'},
-        {'timeframe': '1D', 'bbw': '0.13', 'exchange': 'kucoin'}
+        {'timeframe': '4H', 'bbw': '0.05', 'exchange': 'binance'},
+        {'timeframe': '1D', 'bbw': '0.13', 'exchange': 'binance'}
     ]
     
     current_date = datetime.now().strftime("%Y-%m-%d")
     all_results = []
+    
+    # Fear & Greed Index'i al
+    fear_greed_data = get_fear_greed_index()
     
     for config in scan_configs:
         scan_results = run_scan(
@@ -180,7 +241,12 @@ def main():
                 'results': scan_results
             })
     
-    combined_html = ""
+    # Fear & Greed Index HTML'ini oluştur
+    fear_greed_html = format_fear_greed_html(fear_greed_data)
+    
+    # Tüm tarama sonuçlarını birleştir
+    combined_html = fear_greed_html  # Önce Fear & Greed Index'i göster
+    
     for result in all_results:
         html_content = format_email_html(result['results'], result['timeframe'])
         combined_html += f"<br><hr><br>{html_content}"
