@@ -1,1 +1,2 @@
-web: gunicorn app:app --log-file=-
+web: gunicorn app:app
+worker: python cron_scanner.py
