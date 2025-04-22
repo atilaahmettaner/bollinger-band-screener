@@ -135,15 +135,21 @@ function loadFavorites() {
 }
 
 function createCoinCard(coin) {
+    // Extract base coin name without trading pairs
+    const baseCoin = coin.replace(/USDT|BTC|ETH/i, '');
+    
     return `
         <div class="col-md-4 mb-4">
             <div class="coin-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC${coin.replace(/USDT|BTC|ETH/i, '')}.svg" 
+                        <img src="https://s3-symbol-logo.tradingview.com/crypto/XTVC${baseCoin}.svg" 
                              height="30" width="30" class="rounded-circle me-2" 
                              onerror="this.onerror=null;this.src='https://via.placeholder.com/30?text=${coin.charAt(0)}';">
                         <span class="fw-bold">${coin}</span>
+                        <button class="btn btn-sm btn-outline-info ms-2" onclick="copyToClipboard('${baseCoin}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
                     </div>
                     <button class="btn btn-sm btn-outline-danger" onclick="removeFavorite('${coin}')">
                         <i class="fas fa-trash"></i>
@@ -228,6 +234,32 @@ function getPriceInfo(coin) {
     .catch((error) => {
         priceContainer.innerHTML = '<div class="text-danger">Hata: Veri alınamadı</div>';
         console.error('Error:', error);
+    });
+}
+
+function copyToClipboard(text) {
+    // Create a temporary input element
+    var tempInput = document.createElement("input");
+    tempInput.style = "position: absolute; left: -1000px; top: -1000px";
+    tempInput.value = text;
+    document.body.appendChild(tempInput);
+    
+    // Select and copy the text
+    tempInput.select();
+    document.execCommand("copy");
+    
+    // Remove the temporary element
+    document.body.removeChild(tempInput);
+    
+    // Show success notification
+    Swal.fire({
+        icon: 'success',
+        title: 'Kopyalandı!',
+        text: text + ' panoya kopyalandı',
+        timer: 1500,
+        showConfirmButton: false,
+        position: 'top-end',
+        toast: true
     });
 }
 

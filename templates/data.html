@@ -252,6 +252,9 @@
                                 <button class="btn btn-sm btn-outline-success favorite-btn" onclick="addToWatchlist('{{ coins[1] }}')" id="fav-{{ coins[1] }}">
                                     <i class="fas fa-star"></i>
                                 </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="copyToClipboard('{{ coins[1] | replace('USDT', '') | replace('BTC', '') | replace('ETH', '') }}')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
                             </td>
                         </tr>
                     {% endfor %}
@@ -298,6 +301,33 @@ $(document).ready(function() {
         location.reload();
     }, 300000);
 });
+
+// Copy coin symbol to clipboard
+function copyToClipboard(text) {
+    // Create a temporary input element
+    var tempInput = document.createElement("input");
+    tempInput.style = "position: absolute; left: -1000px; top: -1000px";
+    tempInput.value = text;
+    document.body.appendChild(tempInput);
+    
+    // Select and copy the text
+    tempInput.select();
+    document.execCommand("copy");
+    
+    // Remove the temporary element
+    document.body.removeChild(tempInput);
+    
+    // Show success notification
+    Swal.fire({
+        icon: 'success',
+        title: 'Kopyalandı!',
+        text: text + ' panoya kopyalandı',
+        timer: 1500,
+        showConfirmButton: false,
+        position: 'top-end',
+        toast: true
+    });
+}
 
 // Highlight favorited coins
 function highlightFavorites() {
