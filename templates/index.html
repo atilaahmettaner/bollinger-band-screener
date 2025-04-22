@@ -1,104 +1,426 @@
 <html>
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
-    <link rel="stylesheet" href="/static/table.css">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="easily scan 1800 coin by bollinger band ">
+    <meta name="description" content="Advanced Bollinger Band Scanner for crypto markets">
+    <title>Bollinger Band Scanner</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
     <style>
-        .trending-buttons {
-            margin-top: 20px;
-            margin-bottom: 20px;
+        :root {
+            --primary-bg: #151c2c;
+            --secondary-bg: #1a2439;
+            --accent-color: #4CAF50;
+            --accent-hover: #3d8b40;
+            --text-color: #fff;
+            --card-bg: #0d1b2a;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        .trending-btn {
+        
+        body {
+            background: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .navbar {
+            background-color: var(--secondary-bg);
+            box-shadow: var(--box-shadow);
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .navbar-brand {
+            color: var(--text-color);
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            background: var(--secondary-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .search-card {
+            background: var(--secondary-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .form-control, .form-select {
+            background-color: #11172b;
+            border: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-color);
             padding: 10px 15px;
-            margin-right: 10px;
+            border-radius: var(--border-radius);
+            height: 45px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #111a30;
+            border-color: var(--accent-color);
+            color: var(--text-color);
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        }
+        
+        .scan-btn {
+            background-color: var(--accent-color);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            height: 45px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .scan-btn:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        .trending-btn {
+            padding: 10px 16px;
+            margin: 5px;
             background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: var(--border-radius);
             cursor: pointer;
-            transition: background-color 0.3s;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
         }
+        
         .trending-btn:hover {
-            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .bb-rating-btn {
+            margin: 5px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-width: 130px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .bb-rating-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .info-box {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: var(--box-shadow);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 10px 0;
+        }
+        
+        table th, table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        table th {
+            background-color: rgba(0,0,0,0.2);
+            color: var(--accent-color);
+        }
+        
+        table tr:hover {
+            background-color: rgba(255,255,255,0.03);
+            cursor: pointer;
+        }
+        
+        table td:last-child {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin: 25px 0 15px;
+            color: var(--text-color);
+            position: relative;
+            padding-left: 15px;
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: var(--accent-color);
+            border-radius: 4px;
+        }
+        
+        footer {
+            background-color: var(--secondary-bg);
+            padding: 15px 0;
+            text-align: center;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .trending-btn, .bb-rating-btn {
+                width: calc(50% - 10px);
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            
+            .card-header, .card-body {
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
-<a class="github-button" href="https://github.com/atilaahmettaner/bollinger-band-screener" data-color-scheme="no-preference: dark_dimmed; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" aria-label="Star atilaahmettaner/bollinger-band-screener on GitHub">Star on Github</a>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-chart-line me-2"></i>Bollinger Band Scanner</a>
+            <div class="ms-auto">
+                <a class="github-button" href="https://github.com/atilaahmettaner/bollinger-band-screener" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" aria-label="Star atilaahmettaner/bollinger-band-screener on GitHub">Star on Github</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Main Scanner Form -->
+        <div class="search-card mt-4">
+            <form action="list" method="POST">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-3 col-6">
+                        <select name="times" class="form-select">
+                            {% for hour in Hourss %}
+                                <option value=" {{ hour }} ">{{ hour }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <select id="marketType" name="marketType" class="form-select">
+                            <option value="crypto">Crypto</option>
+                            <option value="stock">Stock</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <select id="exchange" name="exchange" class="form-select"></select>
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <input type="number" name="bbw" step="0.001" placeholder="BBW Value" id="bbw" required="required" class="form-control">
+                    </div>
+                    <div class="col-md-1 col-12">
+                        <button type="submit" class="scan-btn"><i class="fas fa-search me-2"></i>Scan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Trending Coins Section -->
+        <h2 class="section-title"><i class="fas fa-chart-line me-2"></i> Trending Coins</h2>
+        <div class="card">
+            <div class="card-body">
+                <form action="trending" method="POST">
+                    <input type="hidden" name="exchange" value="kucoin">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <button type="submit" name="timeframe" value="5m" class="trending-btn" style="background-color: #4CAF50;">
+                                <i class="fas fa-arrow-trend-up me-1"></i> Top Gainers (5min)
+                            </button>
+                            <button type="submit" name="timeframe" value="15m" class="trending-btn" style="background-color: #4CAF50;">
+                                <i class="fas fa-arrow-trend-up me-1"></i> Top Gainers (15min)
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="submit" name="timeframe" value="1h" class="trending-btn" style="background-color: #3F51B5;">
+                                <i class="fas fa-arrow-trend-up me-1"></i> Top Gainers (1h)
+                            </button>
+                            <button type="submit" name="timeframe" value="4h" class="trending-btn" style="background-color: #673AB7;">
+                                <i class="fas fa-arrow-trend-up me-1"></i> Top Gainers (4h)
+                            </button>
+                            <button type="submit" name="timeframe" value="1D" class="trending-btn" style="background-color: #9C27B0;">
+                                <i class="fas fa-arrow-trend-up me-1"></i> Top Gainers (1D)
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div class="mt-3">
+                    <a href="/favorites" class="trending-btn" style="background-color: #FF9800;">
+                        <i class="fas fa-star me-1"></i> Favorilerim <span id="favoriteCount"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- BB Rating Filter Section -->
+        <h2 class="section-title"><i class="fas fa-filter me-2"></i> Filter by BB Rating</h2>
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <span class="me-2">Timeframe:</span>
+                            <select id="bbRatingTimeframe" onchange="updateBBRatingTimeframe()" class="form-select">
+                                <option value="15m">15 Minutes</option>
+                                <option value="5m">5 Minutes</option>
+                                <option value="1h">1 Hour</option>
+                                <option value="4h">4 Hours</option>
+                                <option value="1D">1 Day</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <form action="trending" method="POST" id="bbRatingForm">
+                    <input type="hidden" name="exchange" value="kucoin">
+                    <input type="hidden" name="filter_type" value="rating">
+                    <input type="hidden" name="timeframe" value="15m" id="selectedTimeframe">
+                    <div class="rating-buttons row">
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <button type="submit" name="rating" value="3" class="btn w-100 bb-rating-btn" style="background-color: #4CAF50; color: white;">
+                                <i class="fas fa-arrow-up me-1"></i> Strong Buy (+3)
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <button type="submit" name="rating" value="2" class="btn w-100 bb-rating-btn" style="background-color: #8BC34A; color: white;">
+                                <i class="fas fa-arrow-up me-1"></i> Buy (+2)
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <button type="submit" name="rating" value="1" class="btn w-100 bb-rating-btn" style="background-color: #CDDC39; color: white;">
+                                <i class="fas fa-arrow-up me-1"></i> Weak Buy (+1)
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <button type="submit" name="rating" value="-1" class="btn w-100 bb-rating-btn" style="background-color: #FFC107; color: white;">
+                                <i class="fas fa-arrow-down me-1"></i> Weak Sell (-1)
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <button type="submit" name="rating" value="-2" class="btn w-100 bb-rating-btn" style="background-color: #FF9800; color: white;">
+                                <i class="fas fa-arrow-down me-1"></i> Sell (-2)
+                            </button>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <button type="submit" name="rating" value="-3" class="btn w-100 bb-rating-btn" style="background-color: #F44336; color: white;">
+                                <i class="fas fa-arrow-down me-1"></i> Strong Sell (-3)
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Scanning Guide Section -->
+        <h2 class="section-title"><i class="fas fa-info-circle me-2"></i> Scanning Guide</h2>
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Scan Duration</th>
+                                <th>Optimal BBW Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1-Day</td>
+                                <td>0.12</td>
+                            </tr>
+                            <tr>
+                                <td>4-Hour</td>
+                                <td>0.04</td>
+                            </tr>
+                            <tr>
+                                <td>1-Hour</td>
+                                <td>0.02</td>
+                            </tr>
+                            <tr>
+                                <td>15-Minutes</td>
+                                <td>0.008</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">Click on a BBW value to use it in the scanner form.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- CoinGecko Widget -->
+        <div class="mt-4">
+            <script src="https://widgets.coingecko.com/coingecko-coin-price-marquee-widget.js"></script>
+            <coingecko-coin-price-marquee-widget coin-ids="bitcoin,ethereum,algorand,polkadot,solana" currency="usd"
+                                                background-color="#1a2439" locale="en"
+                                                font-color="#ffffff"></coingecko-coin-price-marquee-widget>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p class="mb-0">© 2023 Bollinger Band Scanner | <a href="https://github.com/atilaahmettaner/bollinger-band-screener" target="_blank" style="color: var(--accent-color);">GitHub</a></p>
+        </div>
+    </footer>
+
 <script async defer src="https://buttons.github.io/buttons.js"></script>
-<h1>Financal Market Scanner</h1>
-<p>{{ hours_time }}</p>
-<form action="list" method="POST">
-    <select name="times">
-        {% for hour in Hourss %}
-            <option value=" {{ hour }} ">{{ hour }}</option>
-        {% endfor %}
-    </select>
-    <select id="marketType" name="marketType">
-        <option value="crypto">Crypto</option>
-        <option value="stock">Stock</option>
-    </select>
-    <select id="exchange" name="exchange">
-        
-    </select>
-    <input type="number" name="bbw" step="0.001" placeholder="bbw" id="bbw" required="required">
-    <input type="submit" value="Scan"/>
-</form>
-
-<!-- New trending buttons section -->
-<div class="trending-buttons">
-    <h2>Trending Coins</h2>
-    <form action="trending" method="POST">
-        <input type="hidden" name="exchange" value="kucoin">
-        <div style="margin-bottom: 10px;">
-            <button type="submit" name="timeframe" value="5m" class="trending-btn">Top Gainers (5min)</button>
-            <button type="submit" name="timeframe" value="15m" class="trending-btn">Top Gainers (15min)</button>
-        </div>
-        <div>
-            <button type="submit" name="timeframe" value="1h" class="trending-btn" style="background-color: #3F51B5;">Top Gainers (1h)</button>
-            <button type="submit" name="timeframe" value="4h" class="trending-btn" style="background-color: #673AB7;">Top Gainers (4h)</button>
-            <button type="submit" name="timeframe" value="1D" class="trending-btn" style="background-color: #9C27B0;">Top Gainers (1D)</button>
-        </div>
-    </form>
-    <a href="/favorites" class="trending-btn" style="display: inline-block; margin-top: 10px; text-decoration: none; background-color: #FF9800;">
-        <i class="fas fa-star"></i> Favorilerim
-    </a>
-    <div id="favoriteCount" style="display: inline-block; margin-left: 10px; font-size: 0.9em;">
-        <!-- Will be populated by JS -->
-    </div>
-</div>
-
-<!-- BB Rating Filter Buttons -->
-<div class="trending-buttons">
-    <h2>Filter by BB Rating (KuCoin)</h2>
-    <div style="margin-bottom: 15px;">
-        <span style="color: white; margin-right: 10px;">Timeframe:</span>
-        <select id="bbRatingTimeframe" onchange="updateBBRatingTimeframe()" style="padding: 5px; border-radius: 5px; background-color: #16213e; color: white; border: 1px solid #444;">
-            <option value="15m">15 Minutes</option>
-            <option value="5m">5 Minutes</option>
-            <option value="1h">1 Hour</option>
-            <option value="4h">4 Hours</option>
-            <option value="1D">1 Day</option>
-        </select>
-    </div>
-    <form action="trending" method="POST" id="bbRatingForm">
-        <input type="hidden" name="exchange" value="kucoin">
-        <input type="hidden" name="filter_type" value="rating">
-        <input type="hidden" name="timeframe" value="15m" id="selectedTimeframe">
-        <div class="rating-buttons">
-            <button type="submit" name="rating" value="3" class="trending-btn" style="background-color: #4CAF50;">Strong Buy (+3)</button>
-            <button type="submit" name="rating" value="2" class="trending-btn" style="background-color: #8BC34A;">Buy (+2)</button>
-            <button type="submit" name="rating" value="1" class="trending-btn" style="background-color: #CDDC39;">Weak Buy (+1)</button>
-            <button type="submit" name="rating" value="-1" class="trending-btn" style="background-color: #FFC107;">Weak Sell (-1)</button>
-            <button type="submit" name="rating" value="-2" class="trending-btn" style="background-color: #FF9800;">Sell (-2)</button>
-            <button type="submit" name="rating" value="-3" class="trending-btn" style="background-color: #F44336;">Strong Sell (-3)</button>
-        </div>
-    </form>
-</div>
-
 <script>
     var marketType = document.getElementById('marketType');
     var exchange = document.getElementById('exchange');
@@ -137,6 +459,14 @@
         if (watchlist.length > 0) {
             favoriteCount.innerHTML = `(${watchlist.length})`;
         }
+        
+        // Make table rows clickable to set BBW value
+        document.querySelectorAll("table tbody tr").forEach(row => {
+            row.addEventListener('click', function() {
+                const bbwValue = this.cells[1].innerText;
+                document.getElementById('bbw').value = bbwValue;
+            });
+        });
     });
     
     // Update BB Rating timeframe
@@ -146,54 +476,6 @@
         selectedTimeframe.value = timeframeSelect.value;
     }
 </script>
-
-    
-        <div class="info-box">
-        <h2>Scanning Guide</h2>
-        <table>
-            <tr>
-                <th>Scan Duration</th>
-                <th>Optimal BBW Value</th>
-            </tr>
-            <tr>
-                <td>1-Day</td>
-                <td>0.12</td>
-            </tr>
-            <tr>
-                <td>4-Hour</td>
-                <td>0.04</td>
-            </tr>
-            <tr>
-                <td>1-Hour</td>
-                <td>0.02</td>
-            </tr>
-            <tr>
-                <td>15-Minutes</td>
-                <td>0.008</td>
-            </tr>
-        </table>
-    </div>
-
-    <script>
-       
-        var cells = document.querySelectorAll("table tr td:last-child");
-        
-       
-        cells.forEach(function(cell) {
-            cell.addEventListener("click", function() {
-               
-                var value = this.innerText;
-        
-                
-                document.getElementById("bbw").value = value;
-            });
-        });
-        </script>
-<script src="https://widgets.coingecko.com/coingecko-coin-price-marquee-widget.js"></script>
-<coingecko-coin-price-marquee-widget coin-ids="bitcoin,ethereum,algorand,polkadot,solana" currency="usd"
-                                     background-color="#202b38" locale="en"
-                                     font-color="#dbdbdb"></coingecko-coin-price-marquee-widget>
 {% extends "base.html" %}
-
 </body>
 </html>
