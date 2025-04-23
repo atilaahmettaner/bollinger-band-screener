@@ -722,5 +722,106 @@ def watchlist_api():
             "message": str(e)
         }), 500
 
+@app.route('/api/hot-movers', methods=['GET'])
+def hot_movers_api():
+    try:
+        if not check_auth_header(request):
+            return jsonify({'error': 'Unauthorized access'}), 401
+            
+        timeframe = request.args.get("timeframe", "5m")
+        min_change = float(request.args.get("min_change", "3.0"))  # Varsayılan olarak %3 ve üzeri değişim
+        min_rating = int(request.args.get("min_rating", "2"))  # Varsayılan olarak +2 ve üzeri rating
+        max_rating = int(request.args.get("max_rating", "3"))  # Varsayılan olarak maksimum +3 rating
+        exchange = request.args.get("exchange", "kucoin")
+        
+        # Ensure exchange is kucoin (or adjust as needed)
+        exchange = "kucoin"
+        
+        exchange_file = os.path.join(file_dir, f"{exchange}.txt")
+        with open(exchange_file) as file:
+            lines = file.read()
+            line = lines.split('\n')
+        
+        screener = "crypto"
+        
+        # Get analysis for all coins
+        analysis = get_multiple_analysis(screener=screener, interval=timeframe, symbols=line)
+        
+        # Process and filter results
+        hot_movers = []
+        
+        for key, value in analysis.items():
+            try:
+                if value is not None:
+                    open_price = value.indicators["open"]
+                    close = value.indicators["close"]
+                    change = ((close-open_price)/open_price)*100
+                    
+                    # Calculate BBW
+                    sma = value.indicators["SMA20"]
+                    bb_upper = value.indicators["BB.upper"]
+                    bb_lower = value.indicators["BB.lower"]
+                    bb_middle = sma
+                    BBW = (bb_upper - bb_lower) / sma
+                    
+                    # Calculate BB rating
+                    rating = 0
+                    if close > bb_upper:
+                        rating = 3
+                    elif close > bb_middle + ((bb_upper - bb_middle) / 2):
+                        rating = 2
+                    elif close > bb_middle:
+                        rating = 1
+                    elif close < bb_lower:
+                        rating = -3
+                    elif close < bb_middle - ((bb_middle - bb_lower) / 2):
+                        rating = -2
+                    elif close < bb_middle:
+                        rating = -1
+                        
+                    signal = "NEUTRAL"
+                    if rating == 2:
+                        signal = "BUY"
+                    elif rating == -2:
+                        signal = "SELL"
+                    
+                    # Filter for high change and rating within specified range
+                    if change >= min_change and min_rating <= rating <= max_rating:
+                        hot_movers.append({
+                            'symbol': key,
+                            'price': round(close, 4),
+                            'change': round(change, 3),
+                            'bbw': round(BBW, 4),
+                            'rating': rating,
+                            'signal': signal,
+                            'volume': value.indicators.get("volume", 0),
+                            'alert_message': f"{key.split(':')[1]} {timeframe} zaman diliminde %{round(change, 1)} yükseldi ve BB Rating {rating}!"
+                        })
+            except (TypeError, ZeroDivisionError):
+                continue
+        
+        # Sort by change value (descending)
+        sorted_movers = sorted(hot_movers, key=lambda x: x['change'], reverse=True)
+        
+        # Take top 20 coins
+        top_movers = sorted_movers[:20]
+        
+        return jsonify({
+            "status": "success",
+            "timeframe": timeframe,
+            "exchange": exchange,
+            "min_change": min_change,
+            "min_rating": min_rating,
+            "max_rating": max_rating,
+            "count": len(top_movers),
+            "data": top_movers
+        })
+                
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))

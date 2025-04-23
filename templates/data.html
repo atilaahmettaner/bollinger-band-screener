@@ -253,7 +253,7 @@
                                 <button class="btn btn-sm btn-outline-success favorite-btn" onclick="addToWatchlist('{{ coins[1] }}')" id="fav-{{ coins[1] }}">
                                     <i class="fas fa-star"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-info" onclick="copyToClipboard('{{ coins[1] | replace(\"USDT\", \"\") | replace(\"BTC\", \"\") | replace(\"ETH\", \"\") }}')">
+                                <button class="btn btn-sm btn-outline-info" onclick="copyToClipboard('{{ coins[1] | replace('USDT', '') | replace('BTC', '') | replace('ETH', '') }}')">
                                     <i class="fas fa-copy"></i>
                                 </button>
                             </td>

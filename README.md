@@ -208,6 +208,48 @@ Authorization: YOUR_API_KEY
   }
 }
 ```
+#### 6. Hot Movers
+
+**Endpoint:** `/api/hot-movers`  
+**Method:** GET  
+**Description:** Finds coins that have both high price change and specific BB Rating range in a given timeframe.
+
+**Request Parameters:**
+- `timeframe` (query param, default: "5m"): Desired timeframe (5m, 15m, 1h, 4h, 1D)
+- `min_change` (query param, default: "3.0"): Minimum percentage change (e.g. 3.0 = 3% and above)
+- `min_rating` (query param, default: "2"): Minimum BB Rating value (1, 2, 3 etc.)
+- `max_rating` (query param, default: "3"): Maximum BB Rating value (to filter specific rating range)
+- `exchange` (query param, default: "kucoin"): Exchange
+
+**Example Usage:**
+- To filter coins with BB Rating of 2 only: `/api/hot-movers?min_rating=2&max_rating=2`
+- To filter coins with BB Rating of 1 or 2: `/api/hot-movers?min_rating=1&max_rating=2`
+
+**Response:**
+```json
+{
+  "status": "success",
+  "timeframe": "5m",
+  "exchange": "kucoin",
+  "min_change": 3.0,
+  "min_rating": 2,
+  "max_rating": 2,
+  "count": 3,
+  "data": [
+    {
+      "symbol": "KUCOIN:BRWLUSDT",
+      "price": 0.001,
+      "change": 3.966,
+      "bbw": 0.1018,
+      "rating": 2,
+      "signal": "BUY",
+      "volume": 24300,
+      "alert_message": "BRWLUSDT 5m zaman diliminde %4.0 yükseldi ve BB Rating 2!"
+    },
+  
+  ]
+}
+```
 
 ### Error Responses
 
