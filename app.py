@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from tradingview_ta import TA_Handler, get_multiple_analysis
 import os
 from dotenv import load_dotenv
+import json
 
 load_dotenv()  # .env dosyasını yükle
 
@@ -348,6 +349,378 @@ def scan_api():
 @app.route('/favorites', methods=['GET'])
 def favorites():
     return render_template('favorites.html')
+
+@app.route('/api/trending', methods=['GET'])
+def trending_api():
+    try:
+        # API key kontrolü
+        if not check_auth_header(request):
+            return jsonify({'error': 'Unauthorized access'}), 401
+            
+        timeframe = request.args.get("timeframe", "5m")
+        exchange = request.args.get("exchange", "kucoin")
+        filter_type = request.args.get("filter_type", "")
+        rating_filter = request.args.get("rating", "")
+        
+        # Ensure exchange is kucoin
+        exchange = "kucoin"
+        
+        exchange_file = os.path.join(file_dir, f"{exchange}.txt")
+        with open(exchange_file) as file:
+            lines = file.read()
+            line = lines.split('\n')
+        
+        screener = "crypto"
+        
+        # Get analysis for all coins
+        analysis = get_multiple_analysis(screener=screener, interval=timeframe, symbols=line)
+        
+        # Process results
+        coin_changes = []
+        
+        for key, value in analysis.items():
+            try:
+                if value is not None:
+                    open_price = value.indicators["open"]
+                    close = value.indicators["close"]
+                    change = ((close-open_price)/open_price)*100
+                    
+                    # Calculate BBW
+                    sma = value.indicators["SMA20"]
+                    bb_upper = value.indicators["BB.upper"]
+                    bb_lower = value.indicators["BB.lower"]
+                    bb_middle = sma
+                    BBW = (bb_upper - bb_lower) / sma
+                    
+                    # Calculate BB rating
+                    rating = 0
+                    if close > bb_upper:
+                        rating = 3
+                    elif close > bb_middle + ((bb_upper - bb_middle) / 2):
+                        rating = 2
+                    elif close > bb_middle:
+                        rating = 1
+                    elif close < bb_lower:
+                        rating = -3
+                    elif close < bb_middle - ((bb_middle - bb_lower) / 2):
+                        rating = -2
+                    elif close < bb_middle:
+                        rating = -1
+                        
+                    signal = "NEUTRAL"
+                    if rating == 2:
+                        signal = "BUY"
+                    elif rating == -2:
+                        signal = "SELL"
+                    
+                    # Check if we need to filter by BB rating
+                    if filter_type == "rating" and rating_filter and int(rating_filter) != rating:
+                        continue
+                    
+                    coin_changes.append({
+                        'symbol': key,
+                        'price': round(close, 4),
+                        'change': round(change, 3),
+                        'bbw': round(BBW, 4),
+                        'rating': rating,
+                        'signal': signal,
+                        'volume': value.indicators.get("volume", 0)
+                    })
+            except (TypeError, ZeroDivisionError):
+                continue
+        
+        # Sort by change value (descending) if not filtering by rating
+        if filter_type != "rating":
+            sorted_coins = sorted(coin_changes, key=lambda x: x['change'], reverse=True)
+        else:
+            sorted_coins = coin_changes
+        
+        # Take top 50 coins
+        top_coins = sorted_coins[:50]
+        
+        return jsonify({
+            "status": "success",
+            "timeframe": timeframe,
+            "exchange": exchange,
+            "filter_type": filter_type,
+            "rating_filter": rating_filter,
+            "data": top_coins
+        })
+                
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/symbols', methods=['GET'])
+def symbols_api():
+    try:
+        if not check_auth_header(request):
+            return jsonify({'error': 'Unauthorized access'}), 401
+            
+        exchange = request.args.get('exchange', 'kucoin')
+        exchange_file = os.path.join(file_dir, f"{exchange}.txt")
+        
+        try:
+            with open(exchange_file) as file:
+                lines = file.read()
+                symbols = lines.split('\n')
+                symbols = [s for s in symbols if s]  # Remove empty strings
+                
+            return jsonify({
+                "status": "success",
+                "exchange": exchange,
+                "symbols": symbols
+            })
+        except FileNotFoundError:
+            return jsonify({
+                "status": "error",
+                "message": f"Exchange {exchange} not found"
+            }), 404
+            
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/coin-details', methods=['GET'])
+def coin_details_api():
+    try:
+        if not check_auth_header(request):
+            return jsonify({'error': 'Unauthorized access'}), 401
+            
+        symbol = request.args.get('symbol')
+        exchange = request.args.get('exchange', 'kucoin')
+        timeframe = request.args.get('timeframe', '4h')
+        
+        if not symbol:
+            return jsonify({
+                "status": "error",
+                "message": "Symbol parameter is required"
+            }), 400
+            
+        symbol_with_exchange = f"{exchange}:{symbol}"
+        
+        exchange_screener_mapping = {
+            "all": "crypto",
+            "huobi": "crypto", 
+            "kucoin": "crypto",
+            "coinbase": "crypto",
+            "gateio": "crypto",
+            "binance": "crypto",
+            "bitfinex": "crypto",
+            "bybit": "crypto",
+            "okx": "crypto",
+            "bist": "turkey",
+            "nasdaq": "america",
+        }
+        
+        screener = exchange_screener_mapping.get(exchange, "crypto")
+        
+        # Get detailed analysis
+        analysis = get_multiple_analysis(screener=screener, interval=timeframe, symbols=[symbol_with_exchange])
+        
+        if symbol_with_exchange not in analysis or analysis[symbol_with_exchange] is None:
+            return jsonify({
+                "status": "error",
+                "message": f"Symbol {symbol} not found or analysis failed"
+            }), 404
+            
+        value = analysis[symbol_with_exchange]
+        
+        # Extract all indicators
+        indicators = value.indicators
+        
+        # Calculate BB related values
+        try:
+            open_price = indicators["open"]
+            close = indicators["close"]
+            change = ((close-open_price)/open_price)*100
+            sma = indicators["SMA20"]
+            bb_upper = indicators["BB.upper"]
+            bb_lower = indicators["BB.lower"]
+            bb_middle = sma
+            BBW = (bb_upper - bb_lower) / sma
+            
+            # Calculate BB rating
+            rating = 0
+            if close > bb_upper:
+                rating = 3
+            elif close > bb_middle + ((bb_upper - bb_middle) / 2):
+                rating = 2
+            elif close > bb_middle:
+                rating = 1
+            elif close < bb_lower:
+                rating = -3
+            elif close < bb_middle - ((bb_middle - bb_lower) / 2):
+                rating = -2
+            elif close < bb_middle:
+                rating = -1
+                
+            signal = "NEUTRAL"
+            if rating == 2:
+                signal = "BUY"
+            elif rating == -2:
+                signal = "SELL"
+                
+            # Prepare detailed response
+            coin_data = {
+                "symbol": symbol_with_exchange,
+                "timeframe": timeframe,
+                "price": round(close, 4),
+                "open": round(open_price, 4),
+                "high": indicators.get("high", 0),
+                "low": indicators.get("low", 0),
+                "volume": indicators.get("volume", 0),
+                "change": round(change, 3),
+                "bb_rating": rating,
+                "signal": signal,
+                "bbwidth": round(BBW, 4),
+                "bb_upper": round(bb_upper, 4),
+                "bb_middle": round(bb_middle, 4),
+                "bb_lower": round(bb_lower, 4),
+                "rsi": indicators.get("RSI", 0),
+                "ema_50": indicators.get("EMA50", 0),
+                "ema_200": indicators.get("EMA200", 0),
+                "macd": indicators.get("MACD.macd", 0),
+                "macd_signal": indicators.get("MACD.signal", 0),
+                "adx": indicators.get("ADX", 0),
+                "oscillators": value.oscillators if hasattr(value, "oscillators") else {},
+                "moving_averages": value.moving_averages if hasattr(value, "moving_averages") else {}
+            }
+            
+            return jsonify({
+                "status": "success",
+                "data": coin_data
+            })
+            
+        except (TypeError, ZeroDivisionError, KeyError) as e:
+            return jsonify({
+                "status": "error",
+                "message": f"Error calculating indicators: {str(e)}"
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/watchlist', methods=['GET', 'POST', 'DELETE'])
+def watchlist_api():
+    try:
+        if not check_auth_header(request):
+            return jsonify({'error': 'Unauthorized access'}), 401
+            
+        # Burada gerçek bir veritabanı kullanılabilir
+        # Örnek olarak bir dosya-tabanlı yaklaşım gösteriyoruz
+        user_id = request.args.get('user_id', 'anonymous')
+        watchlist_file = os.path.join('data', f'watchlist_{user_id}.json')
+        
+        # GET: Mevcut favori listesini al
+        if request.method == 'GET':
+            try:
+                if not os.path.exists('data'):
+                    os.makedirs('data')
+                    
+                if os.path.exists(watchlist_file):
+                    with open(watchlist_file, 'r') as f:
+                        watchlist = json.load(f)
+                else:
+                    watchlist = []
+                    
+                return jsonify({
+                    "status": "success",
+                    "watchlist": watchlist
+                })
+            except Exception as e:
+                return jsonify({
+                    "status": "error",
+                    "message": f"Error reading watchlist: {str(e)}"
+                }), 500
+                
+        # POST: Yeni bir favori ekle veya listeyi güncelle
+        elif request.method == 'POST':
+            try:
+                data = request.json
+                
+                if not data or 'watchlist' not in data:
+                    return jsonify({
+                        "status": "error",
+                        "message": "Watchlist data is required"
+                    }), 400
+                    
+                watchlist = data['watchlist']
+                
+                if not os.path.exists('data'):
+                    os.makedirs('data')
+                    
+                with open(watchlist_file, 'w') as f:
+                    json.dump(watchlist, f)
+                    
+                return jsonify({
+                    "status": "success",
+                    "message": "Watchlist updated successfully",
+                    "watchlist": watchlist
+                })
+            except Exception as e:
+                return jsonify({
+                    "status": "error",
+                    "message": f"Error updating watchlist: {str(e)}"
+                }), 500
+                
+        # DELETE: Favorilerden bir öğe sil veya tüm listeyi temizle
+        elif request.method == 'DELETE':
+            try:
+                if not os.path.exists(watchlist_file):
+                    return jsonify({
+                        "status": "success",
+                        "message": "Watchlist already empty"
+                    })
+                    
+                symbol = request.args.get('symbol')
+                
+                # Tüm listeyi sil
+                if not symbol:
+                    os.remove(watchlist_file)
+                    return jsonify({
+                        "status": "success",
+                        "message": "Watchlist cleared successfully"
+                    })
+                    
+                # Sadece belirli bir sembolü sil
+                with open(watchlist_file, 'r') as f:
+                    watchlist = json.load(f)
+                    
+                if symbol in watchlist:
+                    watchlist.remove(symbol)
+                    
+                    with open(watchlist_file, 'w') as f:
+                        json.dump(watchlist, f)
+                        
+                    return jsonify({
+                        "status": "success",
+                        "message": f"{symbol} removed from watchlist",
+                        "watchlist": watchlist
+                    })
+                else:
+                    return jsonify({
+                        "status": "error",
+                        "message": f"{symbol} not found in watchlist"
+                    }), 404
+            except Exception as e:
+                return jsonify({
+                    "status": "error",
+                    "message": f"Error processing watchlist request: {str(e)}"
+                }), 500
+                
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))

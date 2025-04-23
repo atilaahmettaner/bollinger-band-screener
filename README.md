@@ -60,3 +60,168 @@ Run docker on localhost:5000
 ```
 
 Go to to http://localhost:5000
+
+## Mobile Application API Documentation
+
+The application provides several API endpoints that can be consumed by mobile applications. All API endpoints require authentication using an API key provided in the Authorization header.
+
+### Authentication
+
+All API requests require an API key:
+
+```
+Authorization: YOUR_API_KEY
+```
+
+### Available Endpoints
+
+#### 1. Scan for Coins
+
+**Endpoint:** `/api/scan`  
+**Method:** POST  
+**Description:** Scans for coins based on Bollinger Band parameters.
+
+**Request Parameters:**
+```json
+{
+  "hours": "4h",  // Timeframe (5m, 15m, 1h, 4h, 1D)
+  "bbw": "0.04",  // Bollinger Band Width threshold
+  "exchange": "kucoin"  // Exchange (kucoin, binance, etc.)
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "timeframe": "4h",
+  "exchange": "kucoin",
+  "data": [
+    {
+      "symbol": "KUCOIN:BTCUSDT",
+      "price": 43215.5,
+      "bbw": 0.0321,
+      "change": 2.5,
+      "rsi": 58.2,
+      "volume": 1234567
+    },
+    // More coins...
+  ]
+}
+```
+
+#### 2. Get Trending Coins
+
+**Endpoint:** `/api/trending`  
+**Method:** GET  
+**Description:** Gets trending coins or coins with specific BB ratings.
+
+**Request Parameters:**
+- `timeframe` (query param, default: "5m")
+- `exchange` (query param, default: "kucoin")
+- `filter_type` (query param, optional: "rating")
+- `rating` (query param, optional: rating value to filter by)
+
+**Response:**
+```json
+{
+  "status": "success",
+  "timeframe": "5m",
+  "exchange": "kucoin",
+  "filter_type": "rating",
+  "rating_filter": "2",
+  "data": [
+    {
+      "symbol": "KUCOIN:ETHUSDT",
+      "price": 2315.75,
+      "change": 1.8,
+      "bbw": 0.0254,
+      "rating": 2,
+      "signal": "BUY",
+      "volume": 987654
+    },
+    // More coins...
+  ]
+}
+```
+
+#### 3. Get Available Symbols
+
+**Endpoint:** `/api/symbols`  
+**Method:** GET  
+**Description:** Gets all available symbols for a specific exchange.
+
+**Request Parameters:**
+- `exchange` (query param, default: "kucoin")
+
+**Response:**
+```json
+{
+  "status": "success",
+  "exchange": "kucoin",
+  "symbols": [
+    "KUCOIN:BTCUSDT",
+    "KUCOIN:ETHUSDT",
+    // More symbols...
+  ]
+}
+```
+
+#### 4. Get Coin Details
+
+**Endpoint:** `/api/coin-details`  
+**Method:** GET  
+**Description:** Gets detailed analysis for a specific coin.
+
+**Request Parameters:**
+- `symbol` (query param, required)
+- `exchange` (query param, default: "kucoin")
+- `timeframe` (query param, default: "4h")
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "symbol": "KUCOIN:BTCUSDT",
+    "timeframe": "4h",
+    "price": 43215.5,
+    "open": 42865.25,
+    "high": 43500.0,
+    "low": 42800.0,
+    "volume": 1234567,
+    "change": 0.82,
+    "bb_rating": 2,
+    "signal": "BUY",
+    "bbwidth": 0.0321,
+    "bb_upper": 43500.0,
+    "bb_middle": 43100.0,
+    "bb_lower": 42700.0,
+    "rsi": 58.2,
+    "ema_50": 42950.0,
+    "ema_200": 41200.0,
+    "macd": 105.5,
+    "macd_signal": 98.2,
+    "adx": 28.5,
+    "oscillators": {},
+    "moving_averages": {}
+  }
+}
+```
+
+### Error Responses
+
+All endpoints will return an error response in the following format:
+
+```json
+{
+  "status": "error",
+  "message": "Error message description"
+}
+```
+
+Common HTTP status codes:
+- 400: Bad Request (missing parameters)
+- 401: Unauthorized (invalid or missing API key)
+- 404: Not Found (requested resource not found)
+- 500: Internal Server Error
