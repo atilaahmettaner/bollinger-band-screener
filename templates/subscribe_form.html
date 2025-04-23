@@ -1,35 +1,112 @@
-<div class="subscribe-box">
-    <h3>Subscribe for Bollinger Band Updates</h3>
-    <p>Get daily crypto alerts sent directly to your inbox</p>
-    
+<div class="subscribe-container">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
+                <div class="alert alert-{{ category }} alert-animate">{{ message }}</div>
             {% endfor %}
         {% endif %}
     {% endwith %}
     
-    <form id="subscribe-form" action="{{ url_for('subscribe') }}" method="post">
-        <div class="form-group">
-            <input type="email" name="email" class="form-control" placeholder="Enter your email address" required>
-            <button type="submit" class="btn btn-primary">Subscribe</button>
+    <div class="subscribe-inner">
+        <div class="subscribe-icon">
+            <i class="fas fa-bell"></i>
         </div>
-    </form>
+        <div class="subscribe-content">
+            <h3>Subscribe for Bollinger Band Updates</h3>
+            <p>Get daily crypto alerts sent directly to your inbox</p>
+            
+            <form id="subscribe-form" action="{{ url_for('subscribe') }}" method="post">
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" name="email" class="form-control" placeholder="Enter your email address" required>
+                    </div>
+                    <button type="submit" class="btn-subscribe">
+                        <span>Subscribe</span>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <style>
-    .subscribe-box {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 5px;
-        margin: 15px 0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    .subscribe-container {
+        position: relative;
+        max-width: 100%;
+        overflow: hidden;
     }
     
-    .subscribe-box h3 {
+    .subscribe-inner {
+        display: flex;
+        align-items: center;
+        background: linear-gradient(45deg, #1a2439, #2a3756);
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.1);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .subscribe-inner:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+    
+    .subscribe-inner::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+    }
+    
+    .subscribe-inner:hover::before {
+        opacity: 1;
+    }
+    
+    .subscribe-icon {
+        flex: 0 0 auto;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        border-radius: 50%;
+        margin-right: 25px;
+        box-shadow: 0 5px 15px rgba(76,175,80,0.3);
+    }
+    
+    .subscribe-icon i {
+        font-size: 32px;
+        color: white;
+    }
+    
+    .subscribe-content {
+        flex: 1;
+    }
+    
+    .subscribe-content h3 {
         margin-top: 0;
-        color: #333;
+        margin-bottom: 10px;
+        color: white;
+        font-size: 24px;
+        font-weight: 600;
+    }
+    
+    .subscribe-content p {
+        color: rgba(255,255,255,0.7);
+        margin-bottom: 20px;
+        font-size: 15px;
     }
     
     .form-group {
@@ -37,42 +114,154 @@
         margin-top: 15px;
     }
     
-    .form-control {
+    .input-wrapper {
+        position: relative;
         flex: 1;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px 0 0 4px;
-        font-size: 14px;
     }
     
-    .btn-primary {
-        background-color: #007bff;
+    .input-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255,255,255,0.4);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 12px 12px 45px;
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px 0 0 8px;
+        color: white;
+        font-size: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        background: rgba(0,0,0,0.3);
+        border-color: #4CAF50;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(76,175,80,0.2);
+    }
+    
+    .form-control::placeholder {
+        color: rgba(255,255,255,0.4);
+    }
+    
+    .btn-subscribe {
+        background: linear-gradient(45deg, #4CAF50, #2E7D32);
         color: white;
         border: none;
-        padding: 10px 15px;
-        border-radius: 0 4px 4px 0;
+        padding: 0 20px;
+        border-radius: 0 8px 8px 0;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 15px;
+        min-width: 140px;
     }
     
-    .btn-primary:hover {
-        background-color: #0069d9;
+    .btn-subscribe span {
+        margin-right: 8px;
+    }
+    
+    .btn-subscribe:hover {
+        background: linear-gradient(45deg, #3d8b40, #1b5e20);
+        box-shadow: 0 5px 15px rgba(76,175,80,0.3);
+    }
+    
+    .btn-subscribe:active {
+        transform: scale(0.98);
+    }
+    
+    .btn-subscribe i {
+        transition: transform 0.3s ease;
+    }
+    
+    .btn-subscribe:hover i {
+        transform: translateX(5px);
     }
     
     .alert {
-        padding: 10px;
-        margin: 10px 0;
-        border-radius: 4px;
+        padding: 12px 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .alert::before {
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        margin-right: 10px;
     }
     
     .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
+        background-color: rgba(76,175,80,0.2);
+        color: #4CAF50;
+        border-left: 4px solid #4CAF50;
+    }
+    
+    .alert-success::before {
+        content: "\f00c";
     }
     
     .alert-danger {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
+        background-color: rgba(244,67,54,0.2);
+        color: #f44336;
+        border-left: 4px solid #f44336;
+    }
+    
+    .alert-danger::before {
+        content: "\f00d";
+    }
+    
+    .alert-animate {
+        animation: slideIn 0.5s forwards;
+    }
+    
+    @keyframes slideIn {
+        0% {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .subscribe-inner {
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .subscribe-icon {
+            margin-right: 0;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            flex-direction: column;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .btn-subscribe {
+            width: 100%;
+            border-radius: 8px;
+        }
     }
 </style> 
