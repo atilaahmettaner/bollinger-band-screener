@@ -28,7 +28,14 @@ def get_active_subscribers():
         # Heroku'da mı yoksa yerel ortamda mı olduğumuzu kontrol et
         if os.environ.get('DATABASE_URL'):
             # Heroku PostgreSQL bağlantısı
-            import psycopg2
+            try:
+                import psycopg2
+            except ImportError:
+                print("psycopg2 modülü eksik, pip install psycopg2-binary ile yükleyin")
+                # Geriye uyumluluk için varsayılan alıcıya geri dön
+                default_recipient = os.getenv('EMAIL_RECIPIENT')
+                return [default_recipient] if default_recipient else []
+                
             db_url = os.environ.get('DATABASE_URL')
             
             # PostgreSQL URL formatı için düzeltme (eğer gerekirse)
