@@ -823,5 +823,10 @@ def hot_movers_api():
             "message": str(e)
         }), 500
 
+@app.route('/hot-movers', methods=['GET'])
+def hot_movers_page():
+    timeframes = ["5m", "15m", "1h", "4h", "1D", "1W"]
+    return render_template('hot_movers.html', timeframes=timeframes)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
