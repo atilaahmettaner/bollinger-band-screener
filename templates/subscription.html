@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Subscription Management{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Subscription Management</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="subscription-box">
+        <h2>Unsubscribe</h2>
+        <p>If you wish to unsubscribe from our Bollinger Band alerts, please enter your email address below:</p>
+        
+        <form action="{{ url_for('unsubscribe') }}" method="post">
+            <div class="form-group">
+                <input type="email" name="email" class="form-control" placeholder="Enter your email address" required>
+                <button type="submit" class="btn btn-danger">Unsubscribe</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    h1 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+    
+    .subscription-box {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        margin: 15px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+        display: flex;
+        margin-top: 15px;
+    }
+    
+    .form-control {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px 0 0 4px;
+        font-size: 14px;
+    }
+    
+    .btn {
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+    }
+    
+    .btn-danger {
+        background-color: #dc3545;
+    }
+    
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+    
+    .alert {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+{% endblock %} 

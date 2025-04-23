@@ -1,6 +1,8 @@
 import os
 import smtplib
 import requests
+import sys
+import sqlite3
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from dotenv import load_dotenv
@@ -14,12 +16,63 @@ EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_USER = os.getenv('EMAIL_USER')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
-EMAIL_RECIPIENT = os.getenv('EMAIL_RECIPIENT')
 API_KEY = os.getenv('API_KEY')
 
 # Scanner configuration - Heroku uygulamasına yönlendirildi
 SCAN_URL = 'https://crypto-scanner-app.herokuapp.com/api/scan'  # Canlı Heroku URL'si
 HEADERS = {'Authorization': API_KEY}
+
+def get_active_subscribers():
+    """Get all active subscribers from the database"""
+    try:
+        # Heroku'da mı yoksa yerel ortamda mı olduğumuzu kontrol et
+        if os.environ.get('DATABASE_URL'):
+            # Heroku PostgreSQL bağlantısı
+            import psycopg2
+            db_url = os.environ.get('DATABASE_URL')
+            
+            # PostgreSQL URL formatı için düzeltme (eğer gerekirse)
+            if db_url.startswith("postgres://"):
+                db_url = db_url.replace("postgres://", "postgresql://", 1)
+                
+            # PostgreSQL bağlantısı kur
+            conn = psycopg2.connect(db_url)
+            cursor = conn.cursor()
+            
+            # Aktif aboneleri sorgula
+            cursor.execute("SELECT email FROM subscriber WHERE is_active = TRUE")
+            subscribers = [row[0] for row in cursor.fetchall()]
+            
+            conn.close()
+            return subscribers
+        else:
+            # Yerel SQLite bağlantısı
+            app_dir = os.path.dirname(os.path.abspath(__file__))
+            db_path = os.path.join(app_dir, 'subscribers.db')
+            
+            # Veritabanı dosyası var mı kontrol et
+            if not os.path.exists(db_path):
+                print(f"Database not found at {db_path}")
+                # Geriye uyumluluk için varsayılan alıcıya geri dön
+                default_recipient = os.getenv('EMAIL_RECIPIENT')
+                return [default_recipient] if default_recipient else []
+            
+            # SQLite veritabanına bağlan
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            
+            # Aktif aboneleri sorgula
+            cursor.execute("SELECT email FROM subscriber WHERE is_active = 1")
+            subscribers = [row[0] for row in cursor.fetchall()]
+            
+            conn.close()
+            return subscribers
+            
+    except Exception as e:
+        print(f"Error getting subscribers: {e}")
+        # Geriye uyumluluk için varsayılan alıcıya geri dön
+        default_recipient = os.getenv('EMAIL_RECIPIENT')
+        return [default_recipient] if default_recipient else []
 
 def run_scan(timeframe='1D', bbw='0.04', exchange='kucoin'):
     """Run the Bollinger Band scan via the API"""
@@ -89,6 +142,12 @@ def format_email_html(scan_results, timeframe):
             a:hover {{
                 text-decoration: underline;
             }}
+            .footer {{
+                margin-top: 20px;
+                font-size: 12px;
+                color: #666;
+                text-align: center;
+            }}
         </style>
     </head>
     <body>
@@ -126,35 +185,55 @@ def format_email_html(scan_results, timeframe):
     
     html += """
         </table>
+        <div class="footer">
+            <p>You received this email because you subscribed to Bollinger Band Scanner alerts.</p>
+            <p>To unsubscribe, <a href="https://crypto-scanner-app.herokuapp.com/subscription">click here</a>.</p>
+        </div>
     </body>
     </html>
     """
     
     return html
 
-def send_email(subject, html_content):
-    """Send an email with the scan results"""
-    if not all([EMAIL_HOST, EMAIL_USER, EMAIL_PASSWORD, EMAIL_RECIPIENT]):
+def send_email(subject, html_content, recipients):
+    """Send an email with the scan results to multiple recipients"""
+    if not all([EMAIL_HOST, EMAIL_USER, EMAIL_PASSWORD]):
         print("Email configuration incomplete. Check your .env file.")
         return False
     
-    msg = MIMEMultipart()
-    msg['From'] = EMAIL_USER
-    msg['To'] = EMAIL_RECIPIENT
-    msg['Subject'] = subject
-    
-    msg.attach(MIMEText(html_content, 'html'))
+    if not recipients:
+        print("No recipients to send email to.")
+        return False
     
     try:
         server = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT)
         server.starttls()
         server.login(EMAIL_USER, EMAIL_PASSWORD)
-        server.send_message(msg)
+        
+        success_count = 0
+        error_count = 0
+        
+        for recipient in recipients:
+            try:
+                msg = MIMEMultipart()
+                msg['From'] = EMAIL_USER
+                msg['To'] = recipient
+                msg['Subject'] = subject
+                
+                msg.attach(MIMEText(html_content, 'html'))
+                
+                server.send_message(msg)
+                success_count += 1
+                print(f"Email sent successfully to {recipient}")
+            except Exception as e:
+                error_count += 1
+                print(f"Failed to send email to {recipient}: {e}")
+        
         server.quit()
-        print(f"Email sent successfully to {EMAIL_RECIPIENT}")
-        return True
+        print(f"Email sending complete. Success: {success_count}, Errors: {error_count}")
+        return success_count > 0
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Failed to connect to email server: {e}")
         return False
 
 def get_fear_greed_index():
@@ -252,8 +331,14 @@ def main():
         combined_html += f"<br><hr><br>{html_content}"
     
     if combined_html:
-        subject = f"Bollinger Band Scan Results - Multiple Timeframes - {current_date}"
-        send_email(subject, combined_html)
+        # Get all active subscribers
+        subscribers = get_active_subscribers()
+        
+        if subscribers:
+            subject = f"Bollinger Band Scan Results - Multiple Timeframes - {current_date}"
+            send_email(subject, combined_html, subscribers)
+        else:
+            print("No active subscribers found. Email not sent.")
 
 if __name__ == "__main__":
     main() 

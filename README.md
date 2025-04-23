@@ -267,3 +267,28 @@ Common HTTP status codes:
 - 401: Unauthorized (invalid or missing API key)
 - 404: Not Found (requested resource not found)
 - 500: Internal Server Error
+
+## Email Subscription System
+
+The application includes an email subscription system that allows users to receive daily Bollinger Band scan results directly to their inbox.
+
+### Features:
+
+- **Subscribe**: Users can subscribe with their email address from the main page.
+- **Automated Emails**: Subscribers receive daily scan results with detailed information about coins that meet the Bollinger Band criteria.
+- **Multiple Timeframes**: The emails include scan results for multiple timeframes (4H and 1D).
+- **Fear & Greed Index**: Each email includes the current Fear & Greed Index value with visual representation.
+- **Unsubscribe**: Users can easily unsubscribe through a link provided in each email.
+
+### How It Works:
+
+1. Users enter their email address in the subscription form on the main page.
+2. The system validates the email and adds it to the subscriber database.
+3. The cron job runs daily to perform scans and send emails to all active subscribers.
+4. Each subscriber receives a personalized email with the latest scan results.
+
+### Subscription Management:
+
+Users can manage their subscription at: `https://crypto-scanner-app.herokuapp.com/subscription`
+
+This page allows users to unsubscribe if they no longer wish to receive scanning emails.

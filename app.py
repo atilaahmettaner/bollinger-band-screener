@@ -1,8 +1,11 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 from tradingview_ta import TA_Handler, get_multiple_analysis
 import os
 from dotenv import load_dotenv
 import json
+from models import db, Subscriber
+from flask_sqlalchemy import SQLAlchemy
+from email_validator import validate_email, EmailNotValidError
 
 load_dotenv()  # .env dosyasını yükle
 
@@ -10,6 +13,29 @@ load_dotenv()  # .env dosyasını yükle
 API_KEY = os.getenv('API_KEY')
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'developmentsecretkey')
+
+# DATABASE_URL varsa (Heroku), PostgreSQL kullan, yoksa SQLite kullan
+if os.environ.get('DATABASE_URL'):
+    # Heroku PostgreSQL
+    db_url = os.environ.get('DATABASE_URL')
+    # PostgreSQL URL formatı için düzeltme (eğer gerekirse)
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+else:
+    # Local SQLite
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///subscribers.db'
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize the database
+db.init_app(app)
+
+# Create database tables
+with app.app_context():
+    db.create_all()
+
 file_dir='coinlist'
 
 line_list = []
@@ -827,6 +853,71 @@ def hot_movers_api():
 def hot_movers_page():
     timeframes = ["5m", "15m", "1h", "4h", "1D", "1W"]
     return render_template('hot_movers.html', timeframes=timeframes)
+
+@app.route('/subscribe', methods=['POST'])
+def subscribe():
+    email = request.form.get('email')
+    
+    # Validate email
+    try:
+        valid = validate_email(email)
+        email = valid.email
+    except EmailNotValidError as e:
+        flash(f'Invalid email: {str(e)}', 'danger')
+        return redirect(url_for('hours_store'))
+    
+    # Check if email already exists
+    existing_subscriber = Subscriber.query.filter_by(email=email).first()
+    
+    if existing_subscriber:
+        if existing_subscriber.is_active:
+            flash('You are already subscribed!', 'info')
+        else:
+            # Reactivate subscription
+            existing_subscriber.is_active = True
+            db.session.commit()
+            flash('Your subscription has been reactivated!', 'success')
+    else:
+        # Add new subscriber
+        new_subscriber = Subscriber(email=email)
+        db.session.add(new_subscriber)
+        db.session.commit()
+        flash('Thank you for subscribing!', 'success')
+    
+    return redirect(url_for('hours_store'))
+
+@app.route('/unsubscribe', methods=['GET', 'POST'])
+def unsubscribe():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        
+        try:
+            valid = validate_email(email)
+            email = valid.email
+        except EmailNotValidError as e:
+            flash(f'Invalid email: {str(e)}', 'danger')
+            return render_template('subscription.html')
+        
+        # Find subscriber
+        subscriber = Subscriber.query.filter_by(email=email).first()
+        
+        if subscriber:
+            if subscriber.is_active:
+                subscriber.is_active = False
+                db.session.commit()
+                flash('You have been unsubscribed successfully.', 'success')
+            else:
+                flash('This email is already unsubscribed.', 'info')
+        else:
+            flash('Email not found in our subscriber list.', 'danger')
+        
+        return render_template('subscription.html')
+    
+    return render_template('subscription.html')
+
+@app.route('/subscription', methods=['GET'])
+def subscription():
+    return render_template('subscription.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
