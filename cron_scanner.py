@@ -23,56 +23,73 @@ SCAN_URL = 'https://crypto-scanner-app.herokuapp.com/api/scan'  # Canlı Heroku 
 HEADERS = {'Authorization': API_KEY}
 
 def get_active_subscribers():
-    """Get all active subscribers from the database"""
+    """
+    Aktif aboneleri veritabanından çeker.
+    Hem Heroku PostgreSQL hem de yerel SQLite için destek sağlar.
+    Sorun olması durumunda varsayılan alıcıyı döndürür.
+    """
     try:
-        # Heroku'da mı yoksa yerel ortamda mı olduğumuzu kontrol et
+        # Heroku postgres veritabanı varsa
         if os.environ.get('DATABASE_URL'):
-            # Heroku PostgreSQL bağlantısı
-            import psycopg2
-            db_url = os.environ.get('DATABASE_URL')
-            
-            # PostgreSQL URL formatı için düzeltme (eğer gerekirse)
-            if db_url.startswith("postgres://"):
-                db_url = db_url.replace("postgres://", "postgresql://", 1)
+            try:
+                # Burada psycopg2 modülünü içe aktarıyoruz
+                import psycopg2
                 
-            # PostgreSQL bağlantısı kur
-            conn = psycopg2.connect(db_url)
-            cursor = conn.cursor()
-            
-            # Aktif aboneleri sorgula
-            cursor.execute("SELECT email FROM subscriber WHERE is_active = TRUE")
-            subscribers = [row[0] for row in cursor.fetchall()]
-            
-            conn.close()
-            return subscribers
+                # DB URL'i düzeltme (gerekirse)
+                db_url = os.environ.get('DATABASE_URL')
+                if db_url.startswith("postgres://"):
+                    db_url = db_url.replace("postgres://", "postgresql://", 1)
+                
+                # SQLAlchemy kullanmadan doğrudan psycopg2 ile bağlantı
+                conn = psycopg2.connect(db_url)
+                cur = conn.cursor()
+                
+                # Aktif aboneleri sorgula
+                cur.execute("SELECT email FROM subscriber WHERE is_active = True")
+                
+                # Sonuçları al
+                subscribers = [row[0] for row in cur.fetchall()]
+                
+                # Bağlantıyı kapat
+                cur.close()
+                conn.close()
+                
+                if subscribers:
+                    print(f"Found {len(subscribers)} active subscribers")
+                    return subscribers
+                else:
+                    print("No active subscribers found in database")
+                    return [os.getenv('EMAIL_RECIPIENT', 'atilaahmet07@gmail.com')]
+                    
+            except ImportError:
+                print("Error: psycopg2 module not found, using default recipient")
+                return [os.getenv('EMAIL_RECIPIENT', 'atilaahmet07@gmail.com')]
+            except Exception as e:
+                print(f"Database error: {str(e)}")
+                return [os.getenv('EMAIL_RECIPIENT', 'atilaahmet07@gmail.com')]
         else:
-            # Yerel SQLite bağlantısı
-            app_dir = os.path.dirname(os.path.abspath(__file__))
-            db_path = os.path.join(app_dir, 'subscribers.db')
-            
-            # Veritabanı dosyası var mı kontrol et
-            if not os.path.exists(db_path):
-                print(f"Database not found at {db_path}")
-                # Geriye uyumluluk için varsayılan alıcıya geri dön
-                default_recipient = os.getenv('EMAIL_RECIPIENT')
-                return [default_recipient] if default_recipient else []
-            
-            # SQLite veritabanına bağlan
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-            
-            # Aktif aboneleri sorgula
-            cursor.execute("SELECT email FROM subscriber WHERE is_active = 1")
-            subscribers = [row[0] for row in cursor.fetchall()]
-            
-            conn.close()
-            return subscribers
-            
+            # Yerel SQLite veritabanı - ihtiyaca göre ayarla
+            try:
+                import sqlite3
+                conn = sqlite3.connect('subscribers.db')
+                cur = conn.cursor()
+                cur.execute("SELECT email FROM subscriber WHERE is_active = 1")
+                subscribers = [row[0] for row in cur.fetchall()]
+                cur.close()
+                conn.close()
+                
+                if subscribers:
+                    print(f"Found {len(subscribers)} active subscribers in SQLite")
+                    return subscribers
+                else:
+                    print("No active subscribers found in SQLite database")
+                    return [os.getenv('EMAIL_RECIPIENT', 'atilaahmet07@gmail.com')]
+            except Exception as e:
+                print(f"SQLite error: {str(e)}")
+                return [os.getenv('EMAIL_RECIPIENT', 'atilaahmet07@gmail.com')]
     except Exception as e:
-        print(f"Error getting subscribers: {e}")
-        # Geriye uyumluluk için varsayılan alıcıya geri dön
-        default_recipient = os.getenv('EMAIL_RECIPIENT')
-        return [default_recipient] if default_recipient else []
+        print(f"Error getting subscribers: {str(e)}")
+        return [os.getenv('EMAIL_RECIPIENT', 'atilaahmet07@gmail.com')]
 
 def run_scan(timeframe='1D', bbw='0.04', exchange='kucoin'):
     """Run the Bollinger Band scan via the API"""
