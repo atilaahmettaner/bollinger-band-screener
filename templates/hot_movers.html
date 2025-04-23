@@ -17,7 +17,7 @@
             --accent-color: #4CAF50;
             --text-color: #e1e1e1;
         }
-         
+        
         body {
             background: var(--primary-bg);
             color: var(--text-color);
@@ -352,7 +352,11 @@
         document.getElementById('statsRow').style.display = 'none';
         
         // Fetch data from API
-        fetch(`/api/hot-movers?timeframe=${timeframe}&min_change=${minChange}&min_rating=${minRating}&max_rating=${maxRating}`)
+        fetch(`/api/hot-movers?timeframe=${timeframe}&min_change=${minChange}&min_rating=${minRating}&max_rating=${maxRating}`, {
+            headers: {
+                'Authorization': 'c29d28e35cd02672bd295c4c5f5x2eccb' // Replace this with your API key or a proper auth method
+            }
+        })
         .then(response => response.json())
         .then(data => {
             // Hide loading indicator
