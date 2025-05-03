@@ -507,21 +507,24 @@ def main():
     fear_greed_html = format_fear_greed_html(fear_greed_data)
 
     # Format Squeeze Scans
-    squeeze_html_parts = []
+    squeeze_html_sections = []
     for result in squeeze_scan_results:
         config = result.get('config', {'timeframe': 'N/A', 'bbw': 'N/A', 'exchange': 'N/A'})
         tf = config['timeframe']
         bbw_limit = config['bbw']
         exchange_name = config['exchange'].upper()
         
-        squeeze_html_parts.append(format_section_html(
+        squeeze_html_sections.append(format_section_html(
             title=f"Bollinger Band Squeeze Opportunities ({tf} - BBW < {bbw_limit})",
             description=f"Assets on {exchange_name} showing a tight BBW, indicating potential for a significant price move.",
             data=result,
             columns=['Symbol', 'Price', 'BBW', 'Change (%)', 'RSI'], # Define columns
             timeframe=tf
         ))
-    combined_squeeze_html = "".join(squeeze_html_parts)
+    
+    # Instead of combining, store them separately for the report
+    squeeze_1d_html = squeeze_html_sections[0] if len(squeeze_html_sections) > 0 else ""
+    squeeze_4h_html = squeeze_html_sections[1] if len(squeeze_html_sections) > 1 else ""
 
     # Format Hot Movers
     hot_movers_tf = hot_movers_config['timeframe']
@@ -548,11 +551,12 @@ def main():
     # 3. Combine HTML into Full Report
     print("\n--- Generating Full Report ---")
     combined_html = generate_full_html_report(
-         fear_greed_html,
-         combined_squeeze_html, 
-         hot_movers_html,
-         showing_strength_html
-     )
+        fear_greed_html,
+        squeeze_1d_html,  # Pass 1D squeeze HTML
+        squeeze_4h_html,  # Pass 4H squeeze HTML
+        hot_movers_html,
+        showing_strength_html
+    )
 
     # 4. Send Email
     print("\n--- Sending Email ---")
