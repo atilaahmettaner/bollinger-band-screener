@@ -32,6 +32,23 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize the database
 db.init_app(app)
 
+@app.before_request
+def redirect_to_custom_domain():
+    """Redirect from Heroku domain to the custom domain."""
+    heroku_domain = 'crypto-scanner-app.herokuapp.com'
+    custom_domain = 'cryptosieve.com'
+    
+    host = request.host.lower() # Gelen isteğin host adını al (küçük harfe çevir)
+    
+    if host == heroku_domain:
+        # Gelen istek Heroku domain'inden ise, custom domain'e yönlendir
+        new_url = request.url.replace(heroku_domain, custom_domain, 1)
+        # HTTPS protokolünü zorunlu kıl
+        if not new_url.startswith('https://'):
+             new_url = new_url.replace('http://', 'https://', 1)
+             
+        return redirect(new_url, code=301) # 301 Kalıcı Yönlendirme
+
 # Create database tables
 with app.app_context():
     db.create_all()
