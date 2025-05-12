@@ -1,0 +1,28 @@
+name: Deployments
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker image tag to deploy'
+        required: true
+
+jobs:
+  build:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script_stop: true
+          script: |
+            cd bollinger-band-screener
+            echo "IMAGE_TAG=${{ inputs.tag }}" > .env
+            docker stop bollinger-band-screener
+            docker rm bollinger-band-screener
+            docker compose --env-file .env up -d --build --no-deps bollinger-band-screener
+
