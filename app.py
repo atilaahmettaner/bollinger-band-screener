@@ -55,22 +55,16 @@ with app.app_context():
 
 file_dir='coinlist'
 
-line_list = []
-line_list1 = []
-data = {}
-element = {}
-element.clear()
-line_list.clear()
-
-
 @app.route('/', methods=['GET', 'POST'])
 def hours_store():
     return render_template('index.html', Hourss=["4h","5m" ,"15m", "1h" , "1D", "1W", "1M"])
 
 @app.route('/trending', methods=['POST'])
 def trending_coins():
-    element.clear()
-    line_list.clear()
+    # ✅ Local değişkenler tanımla
+    local_element = {}
+    local_line_list = []
+    local_line_list1 = []
     
     timeframe = request.form.get("timeframe", "5m")
     exchange = request.form.get("exchange", "kucoin")  # Default to kucoin
@@ -153,9 +147,9 @@ def trending_coins():
     # Take top 50 coins
     top_coins = sorted_coins[:50]
     
-    # Format for template
+    # Format for template - local_element kullan
     for coin in top_coins:
-        element[coin['key']] = [coin['price'], coin['bbw'], coin['change'], coin['rating'], coin['signal']]
+        local_element[coin['key']] = [coin['price'], coin['bbw'], coin['change'], coin['rating'], coin['signal']]
     
     # Create a page title that reflects the operation
     page_title = ""
@@ -176,14 +170,17 @@ def trending_coins():
     else:
         page_title = "Top Gainers"
     
-    line_list.append(element)
-    return render_template('data.html', line_list=line_list, hours=timeframe, line_list1=line_list1, element=element, 
+    local_line_list.append(local_element)
+    return render_template('data.html', line_list=local_line_list, hours=timeframe, line_list1=local_line_list1, element=local_element, 
                           filter_type=filter_type, rating_filter=rating_filter, page_title=page_title)
 
 @app.route('/list', methods=['GET', 'POST'])
 def scan():
-    element.clear()
-    line_list.clear()
+    # ✅ Local değişkenler tanımla
+    local_element = {}
+    local_line_list = []
+    local_line_list1 = []
+    
     hours = request.form.get("times")
     bbw = request.form['bbw']
     exchange = request.form['exchange']
@@ -251,15 +248,15 @@ def scan():
                         price = round(close, 4)
                         BBW = round(BBW, 4)
                         change = round(change, 3)
-                        element[key] = [price, BBW, change, rating, signal]
+                        local_element[key] = [price, BBW, change, rating, signal]
                         
         except (TypeError):
             print(key ," is not defined ")
         except (ZeroDivisionError):
             print(key," bbw value the is zero")
     
-    line_list.append(element)
-    return render_template('data.html', line_list=line_list, hours=hours, line_list1=line_list1, element=element)
+    local_line_list.append(local_element)
+    return render_template('data.html', line_list=local_line_list, hours=hours, line_list1=local_line_list1, element=local_element)
 
 @app.route('/getPrice', methods=['POST'])
 def handle_list_request():
@@ -267,11 +264,13 @@ def handle_list_request():
     hours = request_data.get('hours')
     symbol = request_data.get('symbol')
     exchange = request_data.get('exchange')
-    scanForApi(hours, symbol, exchange)
-    return jsonify(element)
+    result = scanForApi(hours, symbol, exchange)
+    return jsonify(result)
 
 def scanForApi(hours, symbol, exchange):
-    element.clear()
+    # ✅ Local değişken tanımla
+    local_element = {}
+    
     striphours = hours.strip()
     symbol_with_exchange = f"{exchange}:{symbol}"
     if exchange == "kucoin":
@@ -280,6 +279,7 @@ def scanForApi(hours, symbol, exchange):
         analysis = get_multiple_analysis(screener="turkey", interval=striphours, symbols=[symbol_with_exchange])
     elif exchange == "nasdaq":
         analysis = get_multiple_analysis(screener="america", interval=striphours, symbols=[symbol_with_exchange])
+    
     for key, value in analysis.items():
         try:
             if value is not None:
@@ -288,14 +288,16 @@ def scanForApi(hours, symbol, exchange):
                 change = ((close - open_price) / open_price) * 100
                 price = round(close, 4)
                 change = round(change, 3)
-                element["name"] = key
-                element["current"] = price
-                element["change"] = change
-                element["open"] = open_price
-                element["close"] = close
+                local_element["name"] = key
+                local_element["current"] = price
+                local_element["change"] = change
+                local_element["open"] = open_price
+                local_element["close"] = close
 
         except TypeError:
             print(key, " is not defined ")
+    
+    return local_element
 
 def check_auth_header(request):
     auth_header = request.headers.get('Authorization') 
@@ -314,13 +316,11 @@ def scan_api():
         request_data = request.json
         hours = request_data.get('hours', '4h')  # Default 4h
         bbw = request_data.get('bbw', '0.04')   # Default 0.04
-        exchange = request_data.get('exchange', 'kucoin')  # Default binance
+        exchange = request_data.get('exchange', 'kucoin')  # Default kucoin
         
         if not check_auth_header(request):
             return jsonify({'error': 'Unauthorized access'}), 401
 
-        element.clear()
-        line_list.clear()
         
         striphours = hours.strip()
         stripexchange = exchange.strip()
@@ -375,11 +375,14 @@ def scan_api():
                             
             except (TypeError, ZeroDivisionError) as e:
                 continue
+        
+        del analysis
                 
         return jsonify({
             "status": "success",
             "timeframe": hours,
             "exchange": exchange,
+            "count": len(result),
             "data": result
         })
         
@@ -480,6 +483,8 @@ def trending_api():
         
         # Take top 50 coins
         top_coins = sorted_coins[:50]
+        
+        del analysis
         
         return jsonify({
             "status": "success",
@@ -656,13 +661,10 @@ def watchlist_api():
     try:
         if not check_auth_header(request):
             return jsonify({'error': 'Unauthorized access'}), 401
-            
-        # Burada gerçek bir veritabanı kullanılabilir
-        # Örnek olarak bir dosya-tabanlı yaklaşım gösteriyoruz
+      
         user_id = request.args.get('user_id', 'anonymous')
         watchlist_file = os.path.join('data', f'watchlist_{user_id}.json')
         
-        # GET: Mevcut favori listesini al
         if request.method == 'GET':
             try:
                 if not os.path.exists('data'):
