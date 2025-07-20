@@ -22,6 +22,6 @@ jobs:
           script: |
             docker stop bollinger-band-screener
             docker rm bollinger-band-screener
-            docker pull sametavcii/bollinger-band-screener:${{ inputs.tag }}
-            docker run -d --name bollinger-band-screener -p 5001:5001 sametavcii/bollinger-band-screener:${{ inputs.tag }}
+            docker pull atilaahmet/bollinger-band-screener:${{ inputs.tag }}
+            docker run -d --name bollinger-band-screener -p 5001:5001 atilaahmet/bollinger-band-screener:${{ inputs.tag }}
 
