@@ -18,7 +18,6 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script_stop: true
           script: |
             docker stop bollinger-band-screener
             docker rm bollinger-band-screener
