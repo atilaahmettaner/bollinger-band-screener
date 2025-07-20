@@ -25,4 +25,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: sametavcii/bollinger-band-screener:${{ github.ref_name }}
+          tags: atilaahmet/bollinger-band-screener:${{ github.ref_name }}
