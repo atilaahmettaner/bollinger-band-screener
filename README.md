@@ -1,5 +1,5 @@
 # Bolinger Band Screener 
-   ## [crypto-scanner-app.herokuapp.com](https://crypto-scanner-app.herokuapp.com/)  
+   ## [cryptosieve.com](https://cryptosieve.com/)  
 [![GitHub stars](https://img.shields.io/github/stars/atilaahmettaner/CryptoScanner)](https://github.com/atilaahmettaner/CryptoScanner/stargazers)
 
 [![HitCount](https://hits.dwyl.com/atilaahmettaner/bollinger-band-screener.svg?style=flat&show=unique)](http://hits.dwyl.com/atilaahmettaner/bollinger-band-screener)
