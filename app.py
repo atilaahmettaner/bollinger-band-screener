@@ -7,132 +7,29 @@ from models import db, Subscriber
 from flask_sqlalchemy import SQLAlchemy
 from email_validator import validate_email, EmailNotValidError
 
-load_dotenv()  # .env dosyasını yükle
+# New imports from core modules
+from core.services.indicators import compute_metrics
+from core.services.coinlist import load_symbols
+from core.utils.validators import sanitize_timeframe, sanitize_exchange, EXCHANGE_SCREENER
 
-# API_KEY'i .env dosyasından al
+load_dotenv()
+
 API_KEY = os.getenv('API_KEY')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'developmentsecretkey')
 
-# DATABASE_URL varsa (Heroku), PostgreSQL kullan, yoksa SQLite kullan
 if os.environ.get('DATABASE_URL'):
-    # Heroku PostgreSQL
     db_url = os.environ.get('DATABASE_URL')
-    # PostgreSQL URL formatı için düzeltme (eğer gerekirse)
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 else:
-    # Local SQLite
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///subscribers.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize the database
 db.init_app(app)
-
-# ------------------------
-# Small helpers (keep it local and simple)
-# ------------------------
-COINLIST_DIR = 'coinlist'
-ALLOWED_TIMEFRAMES = {"5m", "15m", "1h", "4h", "1D", "1W", "1M"}
-EXCHANGE_SCREENER = {
-    "all": "crypto",
-    "huobi": "crypto",
-    "kucoin": "crypto",
-    "coinbase": "crypto",
-    "gateio": "crypto",
-    "binance": "crypto",
-    "bitfinex": "crypto",
-    "bybit": "crypto",
-    "okx": "crypto",
-    "bist": "turkey",
-    "nasdaq": "america",
-}
-
-
-def sanitize_timeframe(tf: str, default: str = "5m") -> str:
-    if not tf:
-        return default
-    tfs = tf.strip()
-    return tfs if tfs in ALLOWED_TIMEFRAMES else default
-
-
-def sanitize_exchange(ex: str, default: str = "kucoin") -> str:
-    if not ex:
-        return default
-    exs = ex.strip().lower()
-    return exs if exs in EXCHANGE_SCREENER else default
-
-
-def load_symbols(exchange: str) -> list:
-    path = os.path.join(COINLIST_DIR, f"{exchange}.txt")
-    try:
-        with open(path) as f:
-            content = f.read()
-        symbols = [line for line in content.split('\n') if line]
-        return symbols
-    except FileNotFoundError:
-        return []
-
-
-def compute_change(open_price: float, close: float) -> float:
-    return ((close - open_price) / open_price) * 100 if open_price else 0.0
-
-
-def compute_bbw(sma: float, bb_upper: float, bb_lower: float):
-    if not sma:
-        return None
-    return (bb_upper - bb_lower) / sma
-
-
-def compute_bb_rating_signal(close: float, bb_upper: float, bb_middle: float, bb_lower: float):
-    rating = 0
-    if close > bb_upper:
-        rating = 3
-    elif close > bb_middle + ((bb_upper - bb_middle) / 2):
-        rating = 2
-    elif close > bb_middle:
-        rating = 1
-    elif close < bb_lower:
-        rating = -3
-    elif close < bb_middle - ((bb_middle - bb_lower) / 2):
-        rating = -2
-    elif close < bb_middle:
-        rating = -1
-
-    signal = "NEUTRAL"
-    if rating == 2:
-        signal = "BUY"
-    elif rating == -2:
-        signal = "SELL"
-    return rating, signal
-
-
-def compute_metrics(indicators: dict):
-    try:
-        open_price = indicators["open"]
-        close = indicators["close"]
-        sma = indicators["SMA20"]
-        bb_upper = indicators["BB.upper"]
-        bb_lower = indicators["BB.lower"]
-        bb_middle = sma
-
-        change = compute_change(open_price, close)
-        bbw = compute_bbw(sma, bb_upper, bb_lower)
-        rating, signal = compute_bb_rating_signal(close, bb_upper, bb_middle, bb_lower)
-
-        return {
-            "price": round(close, 4),
-            "change": round(change, 3),
-            "bbw": round(bbw, 4) if bbw is not None else None,
-            "rating": rating,
-            "signal": signal,
-        }
-    except (KeyError, TypeError, ZeroDivisionError):
-        return None
-
 
 @app.before_request
 def redirect_to_custom_domain():
@@ -140,18 +37,14 @@ def redirect_to_custom_domain():
     heroku_domain = 'crypto-scanner-app.herokuapp.com'
     custom_domain = 'cryptosieve.com'
     
-    host = request.host.lower() # Gelen isteğin host adını al (küçük harfe çevir)
+    host = request.host.lower()
     
     if host == heroku_domain:
-        # Gelen istek Heroku domain'inden ise, custom domain'e yönlendir
         new_url = request.url.replace(heroku_domain, custom_domain, 1)
-        # HTTPS protokolünü zorunlu kıl
         if not new_url.startswith('https://'):
              new_url = new_url.replace('http://', 'https://', 1)
-             
-        return redirect(new_url, code=301) # 301 Kalıcı Yönlendirme
+        return redirect(new_url, code=301)
 
-# Create database tables
 with app.app_context():
     db.create_all()
 
@@ -163,17 +56,15 @@ def hours_store():
 
 @app.route('/trending', methods=['POST'])
 def trending_coins():
-    # ✅ Local değişkenler tanımla
     local_element = {}
     local_line_list = []
     local_line_list1 = []
     
     timeframe = request.form.get("timeframe", "5m")
-    exchange = request.form.get("exchange", "kucoin")  # Default to kucoin
-    filter_type = request.form.get("filter_type", "")  # Can be "rating" or empty
-    rating_filter = request.form.get("rating", "")  # BB rating to filter by
+    exchange = request.form.get("exchange", "kucoin")
+    filter_type = request.form.get("filter_type", "")
+    rating_filter = request.form.get("rating", "")
     
-    # Ensure exchange is kucoin
     exchange = "kucoin"
     
     exchange_file = os.path.join(file_dir, f"{exchange}.txt")
@@ -181,12 +72,10 @@ def trending_coins():
         lines = file.read()
         line = lines.split('\n')
     
-    screener = "crypto"  # Default to crypto for trending coins
+    screener = "crypto"
     
-    # Get analysis for all coins in the specified timeframe
     analysis = get_multiple_analysis(screener=screener, interval=timeframe, symbols=line)
     
-    # Sort by price change (gains)
     coin_changes = []
     
     for key, value in analysis.items():
@@ -196,14 +85,12 @@ def trending_coins():
                 close = value.indicators["close"]
                 change = ((close-open_price)/open_price)*100
                 
-                # Calculate BBW
                 sma = value.indicators["SMA20"]
                 bb_upper = value.indicators["BB.upper"]
                 bb_lower = value.indicators["BB.lower"]
                 bb_middle = sma
                 BBW = (bb_upper - bb_lower) / sma
                 
-                # Calculate BB rating
                 rating = 0
                 if close > bb_upper:
                     rating = 3
@@ -224,7 +111,6 @@ def trending_coins():
                 elif rating == -2:
                     signal = "SELL"
                 
-                # Check if we need to filter by BB rating
                 if filter_type == "rating" and rating_filter and int(rating_filter) != rating:
                     continue
                 
@@ -239,21 +125,16 @@ def trending_coins():
         except (TypeError, ZeroDivisionError):
             continue
     
-    # Sort by change value (descending) if not filtering by rating
-    # Otherwise, no need to sort as we're already filtering for specific rating
     if filter_type != "rating":
         sorted_coins = sorted(coin_changes, key=lambda x: x['change'], reverse=True)
     else:
         sorted_coins = coin_changes
     
-    # Take top 50 coins
     top_coins = sorted_coins[:50]
     
-    # Format for template - local_element kullan
     for coin in top_coins:
         local_element[coin['key']] = [coin['price'], coin['bbw'], coin['change'], coin['rating'], coin['signal']]
     
-    # Create a page title that reflects the operation
     page_title = ""
     if filter_type == "rating":
         rating_value = int(rating_filter)
@@ -278,7 +159,6 @@ def trending_coins():
 
 @app.route('/list', methods=['GET', 'POST'])
 def scan():
-    # ✅ Local değişkenler tanımla
     local_element = {}
     local_line_list = []
     local_line_list1 = []
@@ -370,7 +250,6 @@ def handle_list_request():
     return jsonify(result)
 
 def scanForApi(hours, symbol, exchange):
-    # ✅ Local değişken tanımla
     local_element = {}
     
     striphours = hours.strip()
@@ -416,9 +295,9 @@ def pageNotFound(error):
 def scan_api():
     try:
         request_data = request.json
-        hours = request_data.get('hours', '4h')  # Default 4h
-        bbw = request_data.get('bbw', '0.04')   # Default 0.04
-        exchange = request_data.get('exchange', 'kucoin')  # Default kucoin
+        hours = request_data.get('hours', '4h')
+        bbw = request_data.get('bbw', '0.04')
+        exchange = request_data.get('exchange', 'kucoin')
         
         if not check_auth_header(request):
             return jsonify({'error': 'Unauthorized access'}), 401
@@ -501,7 +380,6 @@ def favorites():
 @app.route('/api/trending', methods=['GET'])
 def trending_api():
     try:
-        # API key kontrolü
         if not check_auth_header(request):
             return jsonify({'error': 'Unauthorized access'}), 401
             
@@ -510,7 +388,6 @@ def trending_api():
         filter_type = request.args.get("filter_type", "")
         rating_filter = request.args.get("rating", "")
         
-        # Sanitize inputs
         timeframe = sanitize_timeframe(timeframe_raw, "5m")
         exchange = sanitize_exchange(exchange_raw, "kucoin")
         
@@ -523,10 +400,8 @@ def trending_api():
         
         screener = EXCHANGE_SCREENER.get(exchange, "crypto")
         
-        # Get analysis for all coins
         analysis = get_multiple_analysis(screener=screener, interval=timeframe, symbols=symbols)
         
-        # Process results
         coin_changes = []
         
         for key, value in analysis.items():
@@ -536,7 +411,6 @@ def trending_api():
                     if not metrics or metrics["bbw"] is None:
                         continue
 
-                    # Check if we need to filter by BB rating
                     if filter_type == "rating" and rating_filter:
                         try:
                             if int(rating_filter) != metrics["rating"]:
@@ -556,13 +430,11 @@ def trending_api():
             except (TypeError, ZeroDivisionError):
                 continue
         
-        # Sort by change value (descending) if not filtering by rating
         if filter_type != "rating":
             sorted_coins = sorted(coin_changes, key=lambda x: x['change'], reverse=True)
         else:
             sorted_coins = coin_changes
         
-        # Take top 50 coins
         top_coins = sorted_coins[:50]
         
         del analysis
@@ -595,7 +467,7 @@ def symbols_api():
             with open(exchange_file) as file:
                 lines = file.read()
                 symbols = lines.split('\n')
-                symbols = [s for s in symbols if s]  # Remove empty strings
+                symbols = [s for s in symbols if s]
                 
             return jsonify({
                 "status": "success",
@@ -648,7 +520,6 @@ def coin_details_api():
         
         screener = exchange_screener_mapping.get(exchange, "crypto")
         
-        # Get detailed analysis
         analysis = get_multiple_analysis(screener=screener, interval=timeframe, symbols=[symbol_with_exchange])
         
         if symbol_with_exchange not in analysis or analysis[symbol_with_exchange] is None:
@@ -659,10 +530,8 @@ def coin_details_api():
             
         value = analysis[symbol_with_exchange]
         
-        # Extract all indicators
         indicators = value.indicators
         
-        # Calculate BB related values
         try:
             open_price = indicators["open"]
             close = indicators["close"]
@@ -673,7 +542,6 @@ def coin_details_api():
             bb_middle = sma
             BBW = (bb_upper - bb_lower) / sma
             
-            # Calculate BB rating
             rating = 0
             if close > bb_upper:
                 rating = 3
@@ -694,7 +562,6 @@ def coin_details_api():
             elif rating == -2:
                 signal = "SELL"
                 
-            # Prepare detailed response
             coin_data = {
                 "symbol": symbol_with_exchange,
                 "timeframe": timeframe,
@@ -767,7 +634,6 @@ def watchlist_api():
                     "message": f"Error reading watchlist: {str(e)}"
                 }), 500
                 
-        # POST: Yeni bir favori ekle veya listeyi güncelle
         elif request.method == 'POST':
             try:
                 data = request.json
@@ -797,7 +663,6 @@ def watchlist_api():
                     "message": f"Error updating watchlist: {str(e)}"
                 }), 500
                 
-        # DELETE: Favorilerden bir öğe sil veya tüm listeyi temizle
         elif request.method == 'DELETE':
             try:
                 if not os.path.exists(watchlist_file):
@@ -808,7 +673,6 @@ def watchlist_api():
                     
                 symbol = request.args.get('symbol')
                 
-                # Tüm listeyi sil
                 if not symbol:
                     os.remove(watchlist_file)
                     return jsonify({
@@ -816,7 +680,6 @@ def watchlist_api():
                         "message": "Watchlist cleared successfully"
                     })
                     
-                # Sadece belirli bir sembolü sil
                 with open(watchlist_file, 'r') as f:
                     watchlist = json.load(f)
                     
@@ -855,12 +718,11 @@ def hot_movers_api():
             return jsonify({'error': 'Unauthorized access'}), 401
             
         timeframe = request.args.get("timeframe", "5m")
-        min_change = float(request.args.get("min_change", "3.0"))  # Varsayılan olarak %3 ve üzeri değişim
-        min_rating = int(request.args.get("min_rating", "2"))  # Varsayılan olarak +2 ve üzeri rating
-        max_rating = int(request.args.get("max_rating", "3"))  # Varsayılan olarak maksimum +3 rating
+        min_change = float(request.args.get("min_change", "3.0"))
+        min_rating = int(request.args.get("min_rating", "2"))
+        max_rating = int(request.args.get("max_rating", "3"))
         exchange = request.args.get("exchange", "kucoin")
         
-        # Ensure exchange is kucoin (or adjust as needed)
         exchange = "kucoin"
         
         exchange_file = os.path.join(file_dir, f"{exchange}.txt")
@@ -870,10 +732,8 @@ def hot_movers_api():
         
         screener = "crypto"
         
-        # Get analysis for all coins
         analysis = get_multiple_analysis(screener=screener, interval=timeframe, symbols=line)
         
-        # Process and filter results
         hot_movers = []
         
         for key, value in analysis.items():
@@ -883,14 +743,12 @@ def hot_movers_api():
                     close = value.indicators["close"]
                     change = ((close-open_price)/open_price)*100
                     
-                    # Calculate BBW
                     sma = value.indicators["SMA20"]
                     bb_upper = value.indicators["BB.upper"]
                     bb_lower = value.indicators["BB.lower"]
                     bb_middle = sma
                     BBW = (bb_upper - bb_lower) / sma
                     
-                    # Calculate BB rating
                     rating = 0
                     if close > bb_upper:
                         rating = 3
@@ -911,7 +769,6 @@ def hot_movers_api():
                     elif rating == -2:
                         signal = "SELL"
                     
-                    # Filter for high change and rating within specified range
                     if change >= min_change and min_rating <= rating <= max_rating:
                         hot_movers.append({
                             'symbol': key,
@@ -926,10 +783,8 @@ def hot_movers_api():
             except (TypeError, ZeroDivisionError):
                 continue
         
-        # Sort by change value (descending)
         sorted_movers = sorted(hot_movers, key=lambda x: x['change'], reverse=True)
         
-        # Take top 20 coins
         top_movers = sorted_movers[:20]
         
         return jsonify({
@@ -958,7 +813,6 @@ def hot_movers_page():
 def subscribe():
     email = request.form.get('email')
     
-    # Validate email
     try:
         valid = validate_email(email)
         email = valid.email
@@ -966,19 +820,16 @@ def subscribe():
         flash(f'Invalid email: {str(e)}', 'danger')
         return redirect(url_for('hours_store'))
     
-    # Check if email already exists
     existing_subscriber = Subscriber.query.filter_by(email=email).first()
     
     if existing_subscriber:
         if existing_subscriber.is_active:
             flash('You are already subscribed!', 'info')
         else:
-            # Reactivate subscription
             existing_subscriber.is_active = True
             db.session.commit()
             flash('Your subscription has been reactivated!', 'success')
     else:
-        # Add new subscriber
         new_subscriber = Subscriber(email=email)
         db.session.add(new_subscriber)
         db.session.commit()
@@ -998,7 +849,6 @@ def unsubscribe():
             flash(f'Invalid email: {str(e)}', 'danger')
             return render_template('subscription.html')
         
-        # Find subscriber
         subscriber = Subscriber.query.filter_by(email=email).first()
         
         if subscriber:
