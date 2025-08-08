@@ -32,6 +32,108 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize the database
 db.init_app(app)
 
+# ------------------------
+# Small helpers (keep it local and simple)
+# ------------------------
+COINLIST_DIR = 'coinlist'
+ALLOWED_TIMEFRAMES = {"5m", "15m", "1h", "4h", "1D", "1W", "1M"}
+EXCHANGE_SCREENER = {
+    "all": "crypto",
+    "huobi": "crypto",
+    "kucoin": "crypto",
+    "coinbase": "crypto",
+    "gateio": "crypto",
+    "binance": "crypto",
+    "bitfinex": "crypto",
+    "bybit": "crypto",
+    "okx": "crypto",
+    "bist": "turkey",
+    "nasdaq": "america",
+}
+
+
+def sanitize_timeframe(tf: str, default: str = "5m") -> str:
+    if not tf:
+        return default
+    tfs = tf.strip()
+    return tfs if tfs in ALLOWED_TIMEFRAMES else default
+
+
+def sanitize_exchange(ex: str, default: str = "kucoin") -> str:
+    if not ex:
+        return default
+    exs = ex.strip().lower()
+    return exs if exs in EXCHANGE_SCREENER else default
+
+
+def load_symbols(exchange: str) -> list:
+    path = os.path.join(COINLIST_DIR, f"{exchange}.txt")
+    try:
+        with open(path) as f:
+            content = f.read()
+        symbols = [line for line in content.split('\n') if line]
+        return symbols
+    except FileNotFoundError:
+        return []
+
+
+def compute_change(open_price: float, close: float) -> float:
+    return ((close - open_price) / open_price) * 100 if open_price else 0.0
+
+
+def compute_bbw(sma: float, bb_upper: float, bb_lower: float):
+    if not sma:
+        return None
+    return (bb_upper - bb_lower) / sma
+
+
+def compute_bb_rating_signal(close: float, bb_upper: float, bb_middle: float, bb_lower: float):
+    rating = 0
+    if close > bb_upper:
+        rating = 3
+    elif close > bb_middle + ((bb_upper - bb_middle) / 2):
+        rating = 2
+    elif close > bb_middle:
+        rating = 1
+    elif close < bb_lower:
+        rating = -3
+    elif close < bb_middle - ((bb_middle - bb_lower) / 2):
+        rating = -2
+    elif close < bb_middle:
+        rating = -1
+
+    signal = "NEUTRAL"
+    if rating == 2:
+        signal = "BUY"
+    elif rating == -2:
+        signal = "SELL"
+    return rating, signal
+
+
+def compute_metrics(indicators: dict):
+    try:
+        open_price = indicators["open"]
+        close = indicators["close"]
+        sma = indicators["SMA20"]
+        bb_upper = indicators["BB.upper"]
+        bb_lower = indicators["BB.lower"]
+        bb_middle = sma
+
+        change = compute_change(open_price, close)
+        bbw = compute_bbw(sma, bb_upper, bb_lower)
+        rating, signal = compute_bb_rating_signal(close, bb_upper, bb_middle, bb_lower)
+
+        return {
+            "price": round(close, 4),
+            "change": round(change, 3),
+            "bbw": round(bbw, 4) if bbw is not None else None,
+            "rating": rating,
+            "signal": signal,
+        }
+    except (KeyError, TypeError, ZeroDivisionError):
+        return None
+
+
 @app.before_request
 def redirect_to_custom_domain():
     """Redirect from Heroku domain to the custom domain."""
@@ -403,23 +505,26 @@ def trending_api():
         if not check_auth_header(request):
             return jsonify({'error': 'Unauthorized access'}), 401
             
-        timeframe = request.args.get("timeframe", "5m")
-        exchange = request.args.get("exchange", "kucoin")
+        timeframe_raw = request.args.get("timeframe", "5m")
+        exchange_raw = request.args.get("exchange", "kucoin")
         filter_type = request.args.get("filter_type", "")
         rating_filter = request.args.get("rating", "")
         
-        # Ensure exchange is kucoin
-        exchange = "kucoin"
+        # Sanitize inputs
+        timeframe = sanitize_timeframe(timeframe_raw, "5m")
+        exchange = sanitize_exchange(exchange_raw, "kucoin")
         
-        exchange_file = os.path.join(file_dir, f"{exchange}.txt")
-        with open(exchange_file) as file:
-            lines = file.read()
-            line = lines.split('\n')
+        symbols = load_symbols(exchange)
+        if not symbols:
+            return jsonify({
+                "status": "error",
+                "message": f"Exchange symbol list not found for '{exchange}'"
+            }), 404
         
-        screener = "crypto"
+        screener = EXCHANGE_SCREENER.get(exchange, "crypto")
         
         # Get analysis for all coins
-        analysis = get_multiple_analysis(screener=screener, interval=timeframe, symbols=line)
+        analysis = get_multiple_analysis(screener=screener, interval=timeframe, symbols=symbols)
         
         # Process results
         coin_changes = []
@@ -427,49 +532,25 @@ def trending_api():
         for key, value in analysis.items():
             try:
                 if value is not None:
-                    open_price = value.indicators["open"]
-                    close = value.indicators["close"]
-                    change = ((close-open_price)/open_price)*100
-                    
-                    # Calculate BBW
-                    sma = value.indicators["SMA20"]
-                    bb_upper = value.indicators["BB.upper"]
-                    bb_lower = value.indicators["BB.lower"]
-                    bb_middle = sma
-                    BBW = (bb_upper - bb_lower) / sma
-                    
-                    # Calculate BB rating
-                    rating = 0
-                    if close > bb_upper:
-                        rating = 3
-                    elif close > bb_middle + ((bb_upper - bb_middle) / 2):
-                        rating = 2
-                    elif close > bb_middle:
-                        rating = 1
-                    elif close < bb_lower:
-                        rating = -3
-                    elif close < bb_middle - ((bb_middle - bb_lower) / 2):
-                        rating = -2
-                    elif close < bb_middle:
-                        rating = -1
-                        
-                    signal = "NEUTRAL"
-                    if rating == 2:
-                        signal = "BUY"
-                    elif rating == -2:
-                        signal = "SELL"
-                    
-                    # Check if we need to filter by BB rating
-                    if filter_type == "rating" and rating_filter and int(rating_filter) != rating:
+                    metrics = compute_metrics(value.indicators)
+                    if not metrics or metrics["bbw"] is None:
                         continue
+
+                    # Check if we need to filter by BB rating
+                    if filter_type == "rating" and rating_filter:
+                        try:
+                            if int(rating_filter) != metrics["rating"]:
+                                continue
+                        except ValueError:
+                            pass
                     
                     coin_changes.append({
                         'symbol': key,
-                        'price': round(close, 4),
-                        'change': round(change, 3),
-                        'bbw': round(BBW, 4),
-                        'rating': rating,
-                        'signal': signal,
+                        'price': metrics['price'],
+                        'change': metrics['change'],
+                        'bbw': metrics['bbw'],
+                        'rating': metrics['rating'],
+                        'signal': metrics['signal'],
                         'volume': value.indicators.get("volume", 0)
                     })
             except (TypeError, ZeroDivisionError):
