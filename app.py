@@ -10,7 +10,8 @@ from email_validator import validate_email, EmailNotValidError
 # New imports from core modules
 from core.services.indicators import compute_metrics
 from core.services.coinlist import load_symbols
-from core.utils.validators import sanitize_timeframe, sanitize_exchange, EXCHANGE_SCREENER
+from core.utils.validators import sanitize_timeframe, sanitize_exchange, EXCHANGE_SCREENER, ALLOWED_TIMEFRAMES
+from core.services.screener_provider import fetch_screener_indicators, fetch_screener_multi_changes
 
 load_dotenv()
 
@@ -289,7 +290,8 @@ def check_auth_header(request):
 
 @app.errorhandler(404)
 def pageNotFound(error):
-    return render_template('error.html')
+    # Fix template name case to match templates/Error.html
+    return render_template('Error.html')
 
 @app.route('/api/scan', methods=['POST'])
 def scan_api():
@@ -869,5 +871,136 @@ def unsubscribe():
 def subscription():
     return render_template('subscription.html')
 
+@app.route('/api/demo-screener', methods=['GET'])
+def demo_screener():
+    try:
+        if not check_auth_header(request):
+            return jsonify({'error': 'Unauthorized access'}), 401
+        
+        exchange_raw = request.args.get('exchange', 'kucoin')
+        limit_raw = request.args.get('limit', '20')
+        
+        exchange = sanitize_exchange(exchange_raw, 'kucoin')
+        try:
+            limit = max(1, min(int(limit_raw), 50))
+        except ValueError:
+            limit = 20
+        
+        symbols = load_symbols(exchange)
+        if not symbols:
+            return jsonify({
+                'status': 'error',
+                'message': f"Exchange symbol list not found for '{exchange}'"
+            }), 404
+        
+        symbols = symbols[:limit]
+        
+        try:
+            rows = fetch_screener_indicators(exchange, symbols, limit=limit)
+        except ImportError as e:
+            return jsonify({
+                'status': 'error',
+                'message': 'tradingview-screener is not installed. Please add it to requirements.txt and install.'
+            }), 500
+        
+        data = []
+        for row in rows:
+            indicators = row.get('indicators', {})
+            metrics = compute_metrics(indicators)
+            if not metrics or metrics.get('bbw') is None:
+                continue
+            data.append({
+                'symbol': row.get('symbol'),
+                'price': metrics['price'],
+                'change': metrics['change'],
+                'bbw': metrics['bbw'],
+                'rating': metrics['rating'],
+                'signal': metrics['signal'],
+                'volume': indicators.get('volume', 0)
+            })
+        
+        return jsonify({
+            'status': 'success',
+            'exchange': exchange,
+            'count': len(data),
+            'data': data
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/multi-changes', methods=['GET'])
+def multi_changes_api():
+    try:
+        if not check_auth_header(request):
+            return jsonify({'error': 'Unauthorized access'}), 401
+
+        exchange_raw = request.args.get('exchange', 'kucoin')
+        limit_raw = request.args.get('limit', '50')
+        base_tf_raw = request.args.get('base_timeframe', '4h')
+        tfs_raw = request.args.get('timeframes', '15m,1h,4h,1D')  # CSV list
+
+        exchange = sanitize_exchange(exchange_raw, 'kucoin')
+        base_tf = sanitize_timeframe(base_tf_raw, '4h')
+
+        # Parse timeframe list and sanitize
+        req_tfs = [tf.strip() for tf in tfs_raw.split(',') if tf.strip()]
+        timeframes = [tf for tf in req_tfs if tf in ALLOWED_TIMEFRAMES]
+        if not timeframes:
+            timeframes = ['15m', '1h', base_tf, '1D']
+
+        try:
+            limit = max(1, min(int(limit_raw), 200))
+        except ValueError:
+            limit = 50
+
+        # Load symbols from coinlist and cap by limit for performance
+        symbols = load_symbols(exchange)
+        if not symbols:
+            return jsonify({'status': 'error', 'message': f"Exchange symbol list not found for '{exchange}'"}), 404
+        symbols = symbols[:limit]
+
+        # Fetch multi-timeframe data
+        rows = fetch_screener_multi_changes(
+            exchange=exchange,
+            symbols=symbols,
+            timeframes=timeframes,
+            base_timeframe=base_tf,
+            limit=limit,
+        )
+
+        data = []
+        for row in rows:
+            base_ind = row.get('base_indicators', {})
+            metrics = compute_metrics(base_ind)
+            if not metrics or metrics.get('bbw') is None:
+                continue
+            data.append({
+                'symbol': row.get('symbol'),
+                'price': metrics['price'],
+                'bbw': metrics['bbw'],
+                'rating': metrics['rating'],
+                'signal': metrics['signal'],
+                'changes': row.get('changes', {}),
+                'volume': base_ind.get('volume', 0),
+            })
+
+        return jsonify({
+            'status': 'success',
+            'exchange': exchange,
+            'base_timeframe': base_tf,
+            'timeframes': timeframes,
+            'count': len(data),
+            'data': data,
+        })
+    except ImportError as e:
+        return jsonify({'status': 'error', 'message': 'tradingview-screener is not installed. Please add it to requirements.txt and install.'}), 500
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/mcp-server')
+def mcp_server():
+    """Landing page for TradingView MCP Server"""
+    return render_template('mcp_landing.html')
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
+    app.run(debug=True)

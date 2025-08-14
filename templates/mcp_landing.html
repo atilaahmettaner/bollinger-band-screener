@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TradingView MCP Server - Advanced cryptocurrency and stock market analysis for Claude AI. Real-time data, technical indicators, and Bollinger Band intelligence.">
+    <title>TradingView MCP Server - AI-Powered Market Analysis | CryptoSieve</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
+    <style>
+        :root {
+            --primary-bg: #0a0e1a;
+            --secondary-bg: #151c2c;
+            --card-bg: #1a2439;
+            --accent-color: #00d4ff;
+            --accent-secondary: #4CAF50;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c5d6;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #0a0e1a, #151c2c);
+        }
+        
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        /* Header */
+        .navbar {
+            background: rgba(21, 28, 44, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand {
+            color: var(--text-primary) !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        
+        .navbar-brand .icon {
+            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
+            border-radius: 8px;
+            padding: 8px;
+            margin-right: 10px;
+        }
+        
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .nav-link:hover {
+            color: var(--accent-color) !important;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 120px 0 80px;
+            background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+            position: relative;
+        }
+        
+        .hero-content {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero .subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
+            border: none;
+            padding: 15px 30px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            text-decoration: none;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 13px 30px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline:hover {
+            background: var(--accent-color);
+            color: var(--primary-bg);
+            transform: translateY(-2px);
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+            background: var(--secondary-bg);
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            height: 100%;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-color);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        /* Installation Section */
+        .installation {
+            padding: 80px 0;
+            background: var(--primary-bg);
+        }
+        
+        .step-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 30px;
+            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .code-block {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            color: #e6edf3;
+            font-family: 'Fira Code', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent-color);
+            border: none;
+            border-radius: 6px;
+            padding: 5px 10px;
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            opacity: 1;
+        }
+        
+        /* Demo Section */
+        .demo {
+            padding: 80px 0;
+            background: var(--secondary-bg);
+        }
+        
+        .demo-chat {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            border-radius: 18px;
+            max-width: 80%;
+        }
+        
+        .message.user {
+            background: var(--accent-color);
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message.assistant {
+            background: var(--primary-bg);
+            border: 1px solid var(--border-color);
+        }
+        
+        .message-header {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .section-header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Stats Section */
+        .stats {
+            padding: 60px 0;
+            background: var(--card-bg);
+        }
+        
+        .stat-item {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--primary-bg);
+            padding: 60px 0 30px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-primary, .btn-outline {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .feature-card, .step-card {
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <div class="icon">
+                    <i class="fas fa-search-dollar"></i>
+                </div>
+                CryptoSieve
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <a href="/" class="nav-link">
+                    <i class="fas fa-chart-line me-1"></i>Live Screener
+                </a>
+                <a href="https://github.com/atilaahmettaner/tradingview-mcp" target="_blank" class="btn-outline" style="padding: 8px 16px; font-size: 0.9rem;">
+                    <i class="fab fa-github me-2"></i>GitHub
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content fade-in">
+                <h1>TradingView MCP Server</h1>
+                <p class="subtitle">
+                    Advanced cryptocurrency and stock market analysis for Claude AI. 
+                    Real-time data, technical indicators, and intelligent Bollinger Band analysis.
+                </p>
+                <div class="cta-buttons">
+                    <a href="#installation" class="btn btn-primary">
+                        <i class="fas fa-download me-2"></i>Get Started
+                    </a>
+                    <a href="#demo" class="btn-outline">
+                        <i class="fas fa-play me-2"></i>See Demo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-6">
+                    <div class="stat-item fade-in">
+                        <div class="stat-number">8+</div>
+                        <div class="stat-label">Exchanges</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item fade-in">
+                        <div class="stat-number">15+</div>
+                        <div class="stat-label">Indicators</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item fade-in">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">Timeframes</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item fade-in">
+                        <div class="stat-number">Real-time</div>
+                        <div class="stat-label">Data</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>Powerful Features</h2>
+                <p>Everything you need for professional market analysis directly in Claude</p>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Real-time Market Screening</h3>
+                        <p>Find top gainers, losers, and trending assets across multiple exchanges with instant data updates.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>AI-Powered Analysis</h3>
+                        <p>Advanced technical analysis with Bollinger Bands, RSI, MACD, and proprietary rating system.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h3>Multi-Market Support</h3>
+                        <p>Crypto exchanges (KuCoin, Binance, Bybit) and traditional markets (NASDAQ, BIST) in one place.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>Pattern Recognition</h3>
+                        <p>Detect consecutive candle patterns, Bollinger Band squeezes, and breakout opportunities.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3>Multi-Timeframe</h3>
+                        <p>Analyze from 5-minute to monthly charts for comprehensive market perspective.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>Claude Integration</h3>
+                        <p>Seamlessly integrated with Claude Desktop through Model Context Protocol (MCP).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section id="installation" class="installation">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>Quick Installation</h2>
+                <p>Get up and running in minutes with our simple setup process</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <!-- Step 1 -->
+                    <div class="step-card fade-in">
+                        <div class="step-number">1</div>
+                        <h3>Install UV Package Manager</h3>
+                        <p>UV is a fast Python package manager that handles all dependencies automatically. Choose your preferred installation method:</p>
+                        
+                        <h5 class="mt-4 mb-3">Option 1: Using Brew (macOS - Recommended)</h5>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre>brew install uv</pre>
+                        </div>
+                        <p class="text-muted small mt-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            <strong>Recommended for macOS users:</strong> Brew automatically handles PATH configuration and updates.
+                        </p>
+                        
+                        <h5 class="mt-4 mb-3">Option 2: Direct Installation</h5>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre># On macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# On Windows
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</pre>
+                        </div>
+                        
+                        <h5 class="mt-4 mb-3">Verify Installation:</h5>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre>uv --version</pre>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="step-card fade-in">
+                        <div class="step-number">2</div>
+                        <h3>Configure Claude Desktop</h3>
+                        <p>Add the MCP server to your Claude Desktop configuration file.</p>
+                        
+                        <h5 class="mt-4 mb-3">Find your config file:</h5>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre># macOS
+~/Library/Application Support/Claude/claude_desktop_config.json
+
+# Windows
+%APPDATA%\Claude\claude_desktop_config.json
+
+# Linux
+~/.config/Claude/claude_desktop_config.json</pre>
+                        </div>
+
+                        <h5 class="mt-4 mb-3">Add this configuration:</h5>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre>{
+  "mcpServers": {
+    "tradingview-mcp": {
+      "command": "uv",
+      "args": [
+        "tool",
+        "run",
+        "--from",
+        "git+https://github.com/atilaahmettaner/tradingview-mcp.git",
+        "tradingview-mcp"
+      ]
+    }
+  }
+}</pre>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="step-card fade-in">
+                        <div class="step-number">3</div>
+                        <h3>Restart Claude Desktop</h3>
+                        <p>Completely quit and restart Claude Desktop. The first startup may take 30-60 seconds as it downloads dependencies.</p>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="step-card fade-in">
+                        <div class="step-number">4</div>
+                        <h3>Verify Installation</h3>
+                        <p>Test your installation by asking Claude:</p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre>"Show me the top 5 crypto gainers on KuCoin in 15 minutes"</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="demo">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>See It In Action</h2>
+                <p>Real examples of what you can ask Claude with TradingView MCP</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="demo-chat fade-in">
+                        <div class="message user">
+                            <div class="message-header">You</div>
+                            Show me the top 10 crypto gainers on KuCoin in the last 15 minutes
+                        </div>
+                        <div class="message assistant">
+                            <div class="message-header">Claude</div>
+                            Here are the top 10 crypto gainers on KuCoin in the last 15 minutes:
+                            
+                            <br><br><strong>Top Performers:</strong>
+                            <br>1. GARUSDT: +5.577% 
+                            <br>2. LUNCDOWNUSDT: +4.788%
+                            <br>3. DFIUSDT: +5.375%
+                            <br>4. PBXUSDT: +3.377%
+                            <br>5. RBTC1USDT: +3.081%
+                            
+                            <br><br>All coins show strong momentum with Bollinger Band ratings indicating potential continuation...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="demo-chat fade-in">
+                        <div class="message user">
+                            <div class="message-header">You</div>
+                            Analyze Bitcoin with all technical indicators
+                        </div>
+                        <div class="message assistant">
+                            <div class="message-header">Claude</div>
+                            <strong>Bitcoin (BTCUSDT) Technical Analysis:</strong>
+                            
+                            <br><br><strong>Price Action:</strong>
+                            <br>• Current: $67,234.50
+                            <br>• Change: +2.45% (24h)
+                            
+                            <br><br><strong>Technical Indicators:</strong>
+                            <br>• Bollinger Band Rating: +2 (Buy)
+                            <br>• RSI(14): 68.3 (Bullish)
+                            <br>• MACD: Bullish crossover
+                            <br>• EMA20: Above (Uptrend)
+                            
+                            <br><br>Overall sentiment: Strong bullish momentum with room for growth...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-lg-12">
+                    <div class="feature-card fade-in">
+                        <h4><i class="fas fa-lightbulb me-2"></i>More Example Queries:</h4>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Find crypto coins with Bollinger Band squeeze"</li>
+                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Show me NASDAQ stocks with strong momentum"</li>
+                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Find coins with 3 consecutive green candles"</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Which Turkish stocks are down 5% today?"</li>
+                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Compare AAPL vs TSLA technical indicators"</li>
+                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Find high-volume crypto with RSI below 30"</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integration with CryptoSieve -->
+    <section class="installation" style="padding: 60px 0;">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>Try Our Live Screener</h2>
+                <p>Experience the same powerful analysis in your browser</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon mx-auto">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>CryptoSieve Web Interface</h3>
+                        <p class="mb-4">
+                            Use our web-based Bollinger Band screener to test the same features 
+                            before setting up the MCP server. Real-time scanning, multiple exchanges, 
+                            and advanced technical analysis.
+                        </p>
+                        <a href="/" class="btn btn-primary">
+                            <i class="fas fa-external-link-alt me-2"></i>Open Live Screener
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://github.com/atilaahmettaner/tradingview-mcp" target="_blank">
+                    <i class="fab fa-github me-2"></i>GitHub
+                </a>
+                <a href="https://github.com/atilaahmettaner/tradingview-mcp/blob/main/README.md" target="_blank">
+                    <i class="fas fa-book me-2"></i>Documentation
+                </a>
+                <a href="https://github.com/atilaahmettaner/tradingview-mcp/issues" target="_blank">
+                    <i class="fas fa-bug me-2"></i>Report Issues
+                </a>
+                <a href="/" target="_blank">
+                    <i class="fas fa-chart-line me-2"></i>Live Screener
+                </a>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 TradingView MCP Server | CryptoSieve. Built with ❤️ for traders and AI enthusiasts.</p>
+                <p class="mt-2">
+                    <small>Empowering intelligent trading decisions through advanced market analysis</small>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Copy to clipboard function
+        function copyToClipboard(button) {
+            const codeBlock = button.nextElementSibling;
+            const text = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.style.background = '#4CAF50';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = 'var(--accent-color)';
+                }, 2000);
+            });
+        }
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all fade-in elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 100) {
+                navbar.style.background = 'rgba(21, 28, 44, 0.98)';
+            } else {
+                navbar.style.background = 'rgba(21, 28, 44, 0.95)';
+            }
+        });
+
+        // Initialize first visible elements
+        setTimeout(() => {
+            document.querySelectorAll('.fade-in').forEach((el, index) => {
+                if (el.getBoundingClientRect().top < window.innerHeight) {
+                    setTimeout(() => {
+                        el.classList.add('visible');
+                    }, index * 100);
+                }
+            });
+        }, 100);
+    </script>
+</body>
+</html>
