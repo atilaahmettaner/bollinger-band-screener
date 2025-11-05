@@ -68,12 +68,12 @@
             font-weight: bold;
         }
         
-        .signal-buy {
+        .signal-bullish {
             background: rgba(76, 175, 80, 0.2);
             color: #4CAF50;
         }
         
-        .signal-sell {
+        .signal-bearish {
             background: rgba(244, 67, 54, 0.2);
             color: #F44336;
         }
@@ -172,6 +172,10 @@
         </div>
     </div>
 
+    <div class="alert alert-warning" role="alert" style="background: rgba(255, 193, 7, 0.12); border: 1px solid rgba(255, 193, 7, 0.3); color: #ffda79;">
+        <strong><i class="fas fa-circle-exclamation me-2"></i>Notice:</strong> Signals shown are for information only and are not investment advice. Always do your own research before trading.
+    </div>
+
     <!-- Filters Section -->
     <div class="filter-card">
         <h4><i class="fas fa-filter"></i> Filters</h4>
@@ -192,13 +196,13 @@
                 <label class="form-label">BB Rating Filter</label>
                 <div class="d-flex flex-wrap">
                     <div class="rating-pill rating-3" data-rating="3" onclick="toggleRating(this)">
-                        Strong Buy (+3)
+                        Strong Bullish (+3)
                     </div>
                     <div class="rating-pill rating-2 active" data-rating="2" onclick="toggleRating(this)">
-                        Buy (+2)
+                        Bullish Bias (+2)
                     </div>
                     <div class="rating-pill rating-1" data-rating="1" onclick="toggleRating(this)">
-                        Weak Buy (+1)
+                        Mild Bullish (+1)
                     </div>
                 </div>
             </div>
@@ -270,7 +274,7 @@
                     <h5 class="coin-symbol mb-0">BTCUSDT</h5>
                     <small class="coin-alert text-muted">Alert message here</small>
                 </div>
-                <span class="signal-badge signal-buy">BUY</span>
+                <span class="signal-badge signal-bullish">BULLISH</span>
             </div>
             <div class="row g-2 mt-2">
                 <div class="col-6">
@@ -428,10 +432,10 @@
             
             const signalBadge = card.querySelector('.signal-badge');
             signalBadge.textContent = coin.signal;
-            signalBadge.classList.remove('signal-buy', 'signal-sell', 'signal-neutral');
+            signalBadge.classList.remove('signal-bullish', 'signal-bearish', 'signal-neutral');
             signalBadge.classList.add(
-                coin.signal === 'BUY' ? 'signal-buy' : 
-                coin.signal === 'SELL' ? 'signal-sell' : 
+                coin.signal === 'BULLISH' ? 'signal-bullish' : 
+                coin.signal === 'BEARISH' ? 'signal-bearish' : 
                 'signal-neutral'
             );
             

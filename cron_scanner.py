@@ -258,8 +258,8 @@ def format_section_html(title, description, data, columns, link_column_index=0, 
                      formatted_value = f'<span style="color: #ccc;">{value}</span>'
             
             elif col_key == 'Signal':
-                 color = "#4CAF50" if value == "BUY" else ("#F44336" if value == "SELL" else "#ccc")
-                 weight = "bold" if value in ["BUY", "SELL"] else "normal"
+                 color = "#4CAF50" if value == "BULLISH" else ("#F44336" if value == "BEARISH" else "#ccc")
+                 weight = "bold" if value in ["BULLISH", "BEARISH"] else "normal"
                  formatted_value = f'<span style="color: {color}; font-weight: {weight};">{value}</span>'
             
             elif isinstance(value, float):
@@ -393,7 +393,7 @@ def generate_full_html_report(fear_greed_html, squeeze_1d_html, squeeze_4h_html,
                 <h3 style="color: #FFA500;">Notes & Explanations</h3>
                 <p><strong>BBW (Bollinger Band Width):</strong> Measures the narrowness of the bands. Lower values indicate a squeeze, potentially preceding a significant price move.</p>
                 <p><strong>BB Rating:</strong> Indicates price position relative to the Bollinger Bands (+3: Above Upper Band, +2: Upper Half, +1: Above Middle, -1: Below Middle, -2: Lower Half, -3: Below Lower Band).</p>
-                 <p><strong>Signal:</strong> Basic signal based on BB Rating (+2: BUY, -2: SELL).</p>
+                <p><strong>Signal:</strong> Basic signal based on BB Rating (+2: BULLISH, -2: BEARISH). Bilgiler yatırım tavsiyesi değildir.</p>
             </div>
 
             <div class="footer">

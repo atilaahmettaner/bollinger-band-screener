@@ -82,12 +82,12 @@
             font-weight: bold;
         }
         
-        .signal-buy {
+        .signal-bullish {
             background: rgba(76, 175, 80, 0.2);
             color: #4CAF50;
         }
         
-        .signal-sell {
+        .signal-bearish {
             background: rgba(244, 67, 54, 0.2);
             color: #F44336;
         }
@@ -173,6 +173,10 @@
         </div>
     </div>
 
+    <div class="alert alert-warning" role="alert" style="background: rgba(255, 193, 7, 0.12); border: 1px solid rgba(255, 193, 7, 0.3); color: #ffda79;">
+        <strong><i class="fas fa-circle-exclamation me-2"></i>Notice:</strong> The data shown reflects technical indicators only. CryptoSieve does not provide investment advice; every trade you place is at your own risk.
+    </div>
+
 
     <div class="row mb-4">
         <div class="col-md-3">
@@ -184,16 +188,16 @@
         </div>
         <div class="col-md-3">
             <div class="stats-card">
-                <i class="fas fa-arrow-up fa-2x mb-2 text-success"></i>
-                <h4>Buy Signals</h4>
-                <h3 id="buySignals">0</h3>
+                <i class="fas fa-arrow-trend-up fa-2x mb-2 text-success"></i>
+                <h4>Bullish Signals</h4>
+                <h3 id="bullishSignals">0</h3>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stats-card">
-                <i class="fas fa-arrow-down fa-2x mb-2 text-danger"></i>
-                <h4>Sell Signals</h4>
-                <h3 id="sellSignals">0</h3>
+                <i class="fas fa-arrow-trend-down fa-2x mb-2 text-danger"></i>
+                <h4>Bearish Signals</h4>
+                <h3 id="bearishSignals">0</h3>
             </div>
         </div>
         <div class="col-md-3">
@@ -252,7 +256,7 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="signal-badge {{ 'signal-buy' if value[4] == 'BUY' else 'signal-sell' if value[4] == 'SELL' else 'signal-neutral' }}">
+                                <span class="signal-badge {{ 'signal-bullish' if value[4] == 'BULLISH' else 'signal-bearish' if value[4] == 'BEARISH' else 'signal-neutral' }}">
                                     {{ value[4] }}
                                 </span>
                             </td>
@@ -355,17 +359,17 @@ function highlightFavorites() {
 
 function updateStats() {
     const rows = $('#coinsTable').DataTable().rows({search: 'applied'}).data();
-    let buyCount = 0;
-    let sellCount = 0;
+    let bullishCount = 0;
+    let bearishCount = 0;
     
     rows.each(function(value) {
-        if(value[6].includes('BUY')) buyCount++;
-        if(value[6].includes('SELL')) sellCount++;
+        if(value[6].includes('BULLISH')) bullishCount++;
+        if(value[6].includes('BEARISH')) bearishCount++;
     });
     
     $('#totalSignals').text(rows.length);
-    $('#buySignals').text(buyCount);
-    $('#sellSignals').text(sellCount);
+    $('#bullishSignals').text(bullishCount);
+    $('#bearishSignals').text(bearishCount);
 }
 
 function goBack() {

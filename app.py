@@ -108,9 +108,9 @@ def trending_coins():
                     
                 signal = "NEUTRAL"
                 if rating == 2:
-                    signal = "BUY"
+                    signal = "BULLISH"
                 elif rating == -2:
-                    signal = "SELL"
+                    signal = "BEARISH"
                 
                 if filter_type == "rating" and rating_filter and int(rating_filter) != rating:
                     continue
@@ -140,17 +140,17 @@ def trending_coins():
     if filter_type == "rating":
         rating_value = int(rating_filter)
         if rating_value == 3:
-            page_title = "Strong Buy (+3)"
+            page_title = "Strong Bullish (+3)"
         elif rating_value == 2:
-            page_title = "Buy (+2)"
+            page_title = "Bullish Bias (+2)"
         elif rating_value == 1:
-            page_title = "Weak Buy (+1)"
+            page_title = "Mild Bullish (+1)"
         elif rating_value == -1:
-            page_title = "Weak Sell (-1)"
+            page_title = "Mild Bearish (-1)"
         elif rating_value == -2:
-            page_title = "Sell (-2)"
+            page_title = "Bearish Bias (-2)"
         elif rating_value == -3:
-            page_title = "Strong Sell (-3)"
+            page_title = "Strong Bearish (-3)"
     else:
         page_title = "Top Gainers"
     
@@ -217,9 +217,9 @@ def scan():
                     rating = -1
                 signal = "NEUTRAL"
                 if rating == 2:
-                    signal = "BUY"
+                    signal = "BULLISH"
                 elif rating == -2:
-                    signal = "SELL"
+                    signal = "BEARISH"
 
                 conditions = (
                     1 > BBW and BBW < float(bbw)
@@ -560,9 +560,9 @@ def coin_details_api():
                 
             signal = "NEUTRAL"
             if rating == 2:
-                signal = "BUY"
+                signal = "BULLISH"
             elif rating == -2:
-                signal = "SELL"
+                signal = "BEARISH"
                 
             coin_data = {
                 "symbol": symbol_with_exchange,
@@ -767,9 +767,9 @@ def hot_movers_api():
                         
                     signal = "NEUTRAL"
                     if rating == 2:
-                        signal = "BUY"
+                        signal = "BULLISH"
                     elif rating == -2:
-                        signal = "SELL"
+                        signal = "BEARISH"
                     
                     if change >= min_change and min_rating <= rating <= max_rating:
                         hot_movers.append({
@@ -997,10 +997,12 @@ def multi_changes_api():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+
 @app.route('/mcp-server')
 def mcp_server():
     """Landing page for TradingView MCP Server"""
     return render_template('mcp_landing.html')
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)

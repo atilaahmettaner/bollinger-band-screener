@@ -37,12 +37,12 @@
     font-size: 0.875rem;
 }
 
-.signal-buy {
+.signal-bullish {
     background: rgba(34, 197, 94, 0.2);
     color: var(--success-color);
 }
 
-.signal-sell {
+.signal-bearish {
     background: rgba(239, 68, 68, 0.2);
     color: var(--danger-color);
 }

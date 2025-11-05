@@ -137,7 +137,7 @@ Authorization: YOUR_API_KEY
       "change": 1.8,
       "bbw": 0.0254,
       "rating": 2,
-      "signal": "BUY",
+      "signal": "BULLISH",
       "volume": 987654
     },
     // More coins...
@@ -192,7 +192,7 @@ Authorization: YOUR_API_KEY
     "volume": 1234567,
     "change": 0.82,
     "bb_rating": 2,
-    "signal": "BUY",
+    "signal": "BULLISH",
     "bbwidth": 0.0321,
     "bb_upper": 43500.0,
     "bb_middle": 43100.0,
@@ -242,7 +242,7 @@ Authorization: YOUR_API_KEY
       "change": 3.966,
       "bbw": 0.1018,
       "rating": 2,
-      "signal": "BUY",
+      "signal": "BULLISH",
       "volume": 24300,
       "alert_message": "BRWLUSDT 5m zaman diliminde %4.0 yükseldi ve BB Rating 2!"
     },

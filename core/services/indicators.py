@@ -32,9 +32,9 @@ def compute_bb_rating_signal(close: float, bb_upper: float, bb_middle: float, bb
 
     signal = "NEUTRAL"
     if rating == 2:
-        signal = "BUY"
+        signal = "BULLISH"
     elif rating == -2:
-        signal = "SELL"
+        signal = "BEARISH"
     return rating, signal
 
 
