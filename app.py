@@ -121,7 +121,8 @@ def trending_coins():
                     'change': round(change, 3),
                     'bbw': round(BBW, 4),
                     'rating': rating,
-                    'signal': signal
+                    'signal': signal,
+                    'volume': value.indicators.get("volume")
                 })
         except (TypeError, ZeroDivisionError):
             continue
@@ -134,7 +135,7 @@ def trending_coins():
     top_coins = sorted_coins[:50]
     
     for coin in top_coins:
-        local_element[coin['key']] = [coin['price'], coin['bbw'], coin['change'], coin['rating'], coin['signal']]
+        local_element[coin['key']] = [coin['price'], coin['bbw'], coin['change'], coin['rating'], coin['signal'], coin.get('volume')]
     
     page_title = ""
     if filter_type == "rating":
@@ -231,7 +232,8 @@ def scan():
                         price = round(close, 4)
                         BBW = round(BBW, 4)
                         change = round(change, 3)
-                        local_element[key] = [price, BBW, change, rating, signal]
+                        volume = value.indicators.get("volume")
+                        local_element[key] = [price, BBW, change, rating, signal, volume]
                         
         except (TypeError):
             print(key ," is not defined ")

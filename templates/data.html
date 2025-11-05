@@ -218,6 +218,7 @@
                     <th>Coin</th>
                     <th>BB Width</th>
                     <th>Price</th>
+                    <th>Volume</th>
                     <th>Change %</th>
                     <th>BB Rating</th>
                     <th>Signal</th>
@@ -241,8 +242,9 @@
                                     {{ coins[1] }}
                                 </a>
                             </td>
-                            <td>{{ value[0] }}</td>
-                            <td>${{ value[1] }}</td>
+                            <td>{{ value[1] }}</td>
+                            <td>${{ value[0] }}</td>
+                            <td>{{ value[5] }}</td>
                             <td class="{{ 'text-success' if value[2] > 0 else 'text-danger' }}">
                                 {{ value[2] }}%
                             </td>
