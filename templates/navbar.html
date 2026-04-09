@@ -1,0 +1,39 @@
+<nav class="navbar" style="background: rgba(22, 33, 62, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 12px 0; width: 100%; top: 0; z-index: 1000; position: sticky;">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between">
+        <div class="d-flex justify-content-between align-items-center w-sm-100" style="gap: 15px;">
+            <a class="navbar-brand d-flex align-items-center text-white text-decoration-none m-0" href="/" style="font-size: 1.4rem; font-weight: bold;">
+                <div style="width:32px; height:32px; background:linear-gradient(135deg, #00d4ff, #4CAF50); border-radius:8px; display:flex; align-items:center; justify-content:center; margin-right:10px; font-size: 1rem;">📈</div>
+                CryptoSieve
+            </a>
+            
+            <div class="d-none d-md-flex align-items-center gap-3 ms-4">
+                <a href="/" class="text-decoration-none" style="color: #e1e1e1; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;">
+                    <i class="fas fa-home me-1"></i>Home
+                </a>
+                <a href="/favorites" class="text-decoration-none" style="color: #e1e1e1; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;">
+                    <i class="fas fa-star me-1" style="color: #FF9800;"></i>Favorites
+                </a>
+                <a href="/hot-movers" class="text-decoration-none" style="color: #e1e1e1; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;">
+                    <i class="fas fa-fire me-1" style="color: #E91E63;"></i>Hot Movers
+                </a>
+            </div>
+        </div>
+        
+        <div class="d-flex flex-wrap align-items-center gap-2 mt-2 mt-md-0">
+            <a href="/mcp-server" class="btn btn-sm d-flex align-items-center" style="background: linear-gradient(45deg, #00d4ff, #00e676); border: none; padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; color: #000; text-decoration: none;">
+                <i class="fas fa-robot me-1"></i>AI MCP
+            </a>
+            <a href="https://github.com/atilaahmettaner/bollinger-band-screener" target="_blank" class="btn btn-sm" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 7px 14px; border-radius: 8px; text-decoration: none;">
+                <i class="fab fa-github me-1"></i> GitHub
+            </a>
+        </div>
+    </div>
+</nav>
+
+<style>
+    @media (max-width: 768px) {
+        .navbar .container { flex-direction: column; align-items: stretch !important; gap: 10px; }
+        .w-sm-100 { width: 100%; justify-content: space-between !important; }
+    }
+    .navbar a:hover { opacity: 0.8; }
+</style>

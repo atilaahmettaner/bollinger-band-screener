@@ -240,17 +240,7 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container">
-            <a class="navbar-brand" href="/"><i class="fas fa-search-dollar me-2"></i>CryptoSieve</a>
-            <div class="ms-auto d-flex align-items-center gap-3">
-                <a href="/mcp-server" class="trending-btn" style="background-color: #00d4ff; padding: 8px 16px; text-decoration: none; font-size: 0.9rem;">
-                    <i class="fas fa-robot me-2"></i>AI MCP Server
-                </a>
-                <a class="github-button" href="https://github.com/atilaahmettaner/bollinger-band-screener" data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large" aria-label="Star atilaahmettaner/bollinger-band-screener on GitHub">Star on Github</a>
-            </div>
-        </div>
-    </nav>
+    {% include 'navbar.html' %}
 
     <div class="container">
         <!-- MCP Server Announcement -->
