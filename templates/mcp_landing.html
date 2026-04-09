@@ -12,7 +12,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      
       gtag('config', 'G-P6NJB852KG');
     </script>
     
@@ -20,29 +19,32 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     
     <style>
         :root {
-            --primary-bg: #0a0e1a;
-            --secondary-bg: #151c2c;
-            --card-bg: #1a2439;
-            --accent-color: #00d4ff;
-            --accent-secondary: #4CAF50;
+            --primary-bg: #080c18;
+            --secondary-bg: #0f1523;
+            --card-bg: #141d2e;
+            --card-hover: #1a2540;
+            --accent-color: #00c8ff;
+            --accent-secondary: #00e676;
+            --accent-purple: #7c3aed;
             --text-primary: #ffffff;
-            --text-secondary: #b8c5d6;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --border-radius: 12px;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
+            --text-secondary: #8fa3c0;
+            --text-muted: #5a7189;
+            --border-color: rgba(255, 255, 255, 0.07);
+            --border-accent: rgba(0, 200, 255, 0.3);
+            --border-radius: 16px;
+            --border-radius-sm: 10px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+            --shadow-accent: 0 8px 32px rgba(0, 200, 255, 0.15);
+            --glow: 0 0 40px rgba(0, 200, 255, 0.12);
         }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Inter', sans-serif;
@@ -51,436 +53,865 @@
             line-height: 1.6;
             overflow-x: hidden;
         }
-        
-        /* Animated Background */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: linear-gradient(45deg, #0a0e1a, #151c2c);
-        }
-        
-        .bg-animation::before {
+
+        /* ── Grid Background ── */
+        body::before {
             content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 50%);
-            animation: float 20s ease-in-out infinite;
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -1;
+            pointer-events: none;
         }
         
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+        /* ── Glows ── */
+        .bg-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .bg-glow-1 {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(0,200,255,0.08) 0%, transparent 70%);
+            top: -200px; left: -200px;
+            animation: driftA 25s ease-in-out infinite;
+        }
+        .bg-glow-2 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%);
+            bottom: -150px; right: -150px;
+            animation: driftB 30s ease-in-out infinite;
+        }
+        @keyframes driftA {
+            0%,100% { transform: translate(0,0); }
+            50% { transform: translate(80px, 60px); }
+        }
+        @keyframes driftB {
+            0%,100% { transform: translate(0,0); }
+            50% { transform: translate(-60px, -80px); }
         }
         
-        /* Header */
+        /* ── Navbar ── */
         .navbar {
-            background: rgba(21, 28, 44, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(8, 12, 24, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border-color);
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
             transition: all 0.3s ease;
+            padding: 14px 0;
         }
         
         .navbar-brand {
             color: var(--text-primary) !important;
-            font-weight: 700;
-            font-size: 1.5rem;
+            font-weight: 800;
+            font-size: 1.35rem;
             display: flex;
             align-items: center;
             text-decoration: none;
+            gap: 10px;
+            letter-spacing: -0.02em;
         }
         
-        .navbar-brand .icon {
-            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
-            border-radius: 8px;
-            padding: 8px;
-            margin-right: 10px;
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            box-shadow: 0 0 20px rgba(0,200,255,0.3);
+        }
+
+        .nav-badge {
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-secondary));
+            color: #000;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
         
         .nav-link {
             color: var(--text-secondary) !important;
             font-weight: 500;
-            transition: color 0.3s ease;
+            font-size: 0.9rem;
+            transition: color 0.25s ease;
             text-decoration: none;
         }
+        .nav-link:hover { color: var(--accent-color) !important; }
         
-        .nav-link:hover {
-            color: var(--accent-color) !important;
+        .btn-nav {
+            background: transparent;
+            border: 1px solid var(--border-accent);
+            color: var(--accent-color);
+            padding: 7px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-nav:hover {
+            background: rgba(0,200,255,0.1);
+            color: var(--accent-color);
         }
         
-        /* Hero Section */
+        /* ── Hero ── */
         .hero {
-            padding: 120px 0 80px;
-            background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+            padding: 140px 0 100px;
             position: relative;
         }
         
-        .hero-content {
-            text-align: center;
-            position: relative;
-            z-index: 2;
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,200,255,0.08);
+            border: 1px solid rgba(0,200,255,0.25);
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 28px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .hero-badge .dot {
+            width: 6px; height: 6px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.4); }
         }
         
         .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
+            font-size: clamp(2.8rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.04em;
+            margin-bottom: 24px;
+        }
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #5eead4 50%, var(--accent-secondary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
         
         .hero .subtitle {
-            font-size: 1.3rem;
+            font-size: 1.15rem;
             color: var(--text-secondary);
-            margin-bottom: 40px;
-            max-width: 800px;
+            margin-bottom: 44px;
+            max-width: 680px;
             margin-left: auto;
             margin-right: auto;
+            line-height: 1.8;
+            font-weight: 400;
+        }
+
+        .hero-logo {
+            width: 96px;
+            height: 96px;
+            background: linear-gradient(135deg, rgba(0,200,255,0.15) 0%, rgba(0,230,118,0.1) 100%);
+            border: 1px solid rgba(0,200,255,0.3);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+            font-size: 2.8rem;
+            box-shadow: 0 0 60px rgba(0,200,255,0.15), inset 0 0 30px rgba(0,200,255,0.05);
+            position: relative;
+        }
+        .hero-logo::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(0,200,255,0.4), rgba(0,230,118,0.2), transparent);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            padding: 1px;
         }
         
         .cta-buttons {
             display: flex;
-            gap: 20px;
+            gap: 16px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 30px;
+            margin-top: 10px;
         }
         
-        .btn-primary {
-            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
+        .btn-primary-cta {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
             border: none;
-            padding: 15px 30px;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow);
-            text-decoration: none;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            color: white;
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--accent-color);
-            color: var(--accent-color);
-            padding: 13px 30px;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            font-size: 1.1rem;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-outline:hover {
-            background: var(--accent-color);
-            color: var(--primary-bg);
-            transform: translateY(-2px);
-        }
-        
-        /* Features Section */
-        .features {
-            padding: 80px 0;
-            background: var(--secondary-bg);
-        }
-        
-        .feature-card {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            height: 100%;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--accent-color);
-        }
-        
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
+            padding: 14px 28px;
             border-radius: 12px;
-            display: flex;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 24px rgba(0,200,255,0.25);
+            text-decoration: none;
+            color: #000 !important;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-        }
-        
-        .feature-card h3 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--text-primary);
-        }
-        
-        .feature-card p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-        
-        /* Installation Section */
-        .installation {
-            padding: 80px 0;
-            background: var(--primary-bg);
-        }
-        
-        .step-card {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
-        
-        .step-number {
-            position: absolute;
-            top: -15px;
-            left: 30px;
-            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-        
-        .code-block {
-            background: #0d1117;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            margin: 15px 0;
-            overflow-x: auto;
-            position: relative;
-        }
-        
-        .code-block pre {
-            margin: 0;
-            color: #e6edf3;
-            font-family: 'Fira Code', 'Monaco', monospace;
-            font-size: 0.9rem;
-        }
-        
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--accent-color);
-            border: none;
-            border-radius: 6px;
-            padding: 5px 10px;
-            color: white;
-            font-size: 0.8rem;
+            gap: 8px;
+            letter-spacing: -0.01em;
             cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.3s ease;
+        }
+        .btn-primary-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 36px rgba(0,200,255,0.4);
+            color: #000 !important;
         }
         
-        .copy-btn:hover {
-            opacity: 1;
-        }
-        
-        /* Demo Section */
-        .demo {
-            padding: 80px 0;
-            background: var(--secondary-bg);
-        }
-        
-        .demo-chat {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 30px;
+        .btn-ghost-cta {
+            background: rgba(255,255,255,0.04);
             border: 1px solid var(--border-color);
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        
-        .message {
-            margin-bottom: 20px;
-            padding: 15px 20px;
-            border-radius: 18px;
-            max-width: 80%;
-        }
-        
-        .message.user {
-            background: var(--accent-color);
-            color: white;
-            margin-left: auto;
-        }
-        
-        .message.assistant {
-            background: var(--primary-bg);
-            border: 1px solid var(--border-color);
-        }
-        
-        .message-header {
+            color: var(--text-secondary);
+            padding: 14px 28px;
+            border-radius: 12px;
             font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-ghost-cta:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.15);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        /* ── Stats Strip ── */
+        .stats-strip {
+            padding: 32px 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(20,29,46,0.5);
+        }
+        .stat-item { text-align: center; }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 4px;
         }
         
-        /* Section Headers */
+        /* ── Section ── */
         .section-header {
             text-align: center;
             margin-bottom: 60px;
         }
-        
-        .section-header h2 {
-            font-size: 2.5rem;
+        .section-tag {
+            display: inline-block;
+            background: rgba(0,200,255,0.08);
+            border: 1px solid rgba(0,200,255,0.2);
+            color: var(--accent-color);
+            font-size: 0.72rem;
             font-weight: 700;
-            margin-bottom: 15px;
-            background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+        .section-header h2 {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 14px;
+        }
+        .section-header p {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        /* ── Features ── */
+        .features { padding: 100px 0; background: var(--secondary-bg); }
+        
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 32px;
+            height: 100%;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,200,255,0.4), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(0,200,255,0.2);
+            background: var(--card-hover);
+            box-shadow: var(--shadow-accent);
+        }
+        .feature-card:hover::before { opacity: 1; }
+        
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, rgba(0,200,255,0.15), rgba(0,230,118,0.1));
+            border: 1px solid rgba(0,200,255,0.2);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            color: var(--accent-color);
+        }
+        .feature-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+        .feature-card p { color: var(--text-secondary); font-size: 0.93rem; line-height: 1.7; }
+        
+        /* ── Installation ── */
+        .installation { padding: 100px 0; background: var(--primary-bg); }
+        
+        .step-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            transition: border-color 0.3s ease;
+        }
+        .step-card:hover { border-color: rgba(0,200,255,0.2); }
+        
+        .step-number {
+            position: absolute;
+            top: -14px;
+            left: 28px;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            color: #000;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+        }
+        
+        .step-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.02em; }
+        .step-card p { color: var(--text-secondary); font-size: 0.93rem; }
+        
+        .code-block {
+            background: #050810;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        .code-block pre {
+            margin: 0;
+            color: #8be9fd;
+            font-family: 'SF Mono', 'Fira Code', 'Monaco', monospace;
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(0,200,255,0.1);
+            border: 1px solid rgba(0,200,255,0.2);
+            border-radius: 6px;
+            padding: 4px 10px;
+            color: var(--accent-color);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .copy-btn:hover { background: rgba(0,200,255,0.2); }
+
+        /* ── PRICING SECTION ── */
+        .pricing { padding: 100px 0; background: var(--secondary-bg); }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 640px) {
+            .pricing-grid { grid-template-columns: 1fr; }
+        }
+
+        .pricing-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 36px 32px;
+            position: relative;
+            transition: all 0.35s ease;
+            overflow: hidden;
+        }
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(0,200,255,0.3), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .pricing-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(0,200,255,0.2);
+            box-shadow: var(--shadow-accent);
+        }
+        .pricing-card:hover::before { opacity: 1; }
+
+        .pricing-card.featured {
+            border-color: rgba(0,200,255,0.35);
+            background: linear-gradient(160deg, rgba(0,200,255,0.06) 0%, var(--card-bg) 60%);
+            box-shadow: 0 0 60px rgba(0,200,255,0.08);
+        }
+        .pricing-card.featured::before { opacity: 1; }
+
+        .pricing-badge {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            color: #000;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .plan-icon {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+        .plan-icon.hosted {
+            background: linear-gradient(135deg, rgba(0,200,255,0.15), rgba(0,230,118,0.08));
+            border: 1px solid rgba(0,200,255,0.2);
+            color: var(--accent-color);
+        }
+        .plan-icon.selfhost {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-secondary);
+        }
+
+        .plan-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .plan-price {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+        .price-amount {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+        .price-amount.gradient {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
-        .section-header p {
-            font-size: 1.2rem;
+        .price-period {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .plan-desc {
+            font-size: 0.88rem;
             color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto;
+            margin-bottom: 24px;
+            line-height: 1.6;
         }
-        
-        /* Stats Section */
-        .stats {
-            padding: 60px 0;
-            background: var(--card-bg);
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 28px;
         }
-        
-        .stat-item {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .stat-number {
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--accent-color);
+        .plan-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
             margin-bottom: 10px;
         }
-        
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
+        .plan-features li .fi {
+            color: var(--accent-secondary);
+            margin-top: 2px;
+            flex-shrink: 0;
         }
+        .plan-features li .fi.muted {
+            color: var(--text-muted);
+        }
+
+        .btn-hosted {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            color: #000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: -0.01em;
+            box-shadow: 0 4px 20px rgba(0,200,255,0.25);
+            text-decoration: none;
+        }
+        .btn-hosted:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(0,200,255,0.4);
+            color: #000;
+        }
+
+        .btn-selfhost {
+            width: 100%;
+            padding: 13px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-selfhost:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.15);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        /* ── COMING SOON MODAL ── */
+        .cs-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 8, 16, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .cs-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .cs-modal {
+            background: var(--card-bg);
+            border: 1px solid rgba(0,200,255,0.25);
+            border-radius: 24px;
+            padding: 48px 40px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            box-shadow: 0 0 80px rgba(0,200,255,0.1), var(--shadow-lg);
+        }
+        .cs-overlay.active .cs-modal {
+            transform: scale(1) translateY(0);
+        }
+        .cs-modal-close {
+            position: absolute;
+            top: 16px; right: 16px;
+            width: 32px; height: 32px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+        .cs-modal-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-primary);
+        }
+        .cs-icon {
+            width: 72px; height: 72px;
+            background: linear-gradient(135deg, rgba(0,200,255,0.12), rgba(0,230,118,0.08));
+            border: 1px solid rgba(0,200,255,0.25);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 24px;
+        }
+        .cs-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 12px;
+        }
+        .cs-title span {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .cs-desc {
+            color: var(--text-secondary);
+            font-size: 0.93rem;
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+        .cs-price-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,200,255,0.08);
+            border: 1px solid rgba(0,200,255,0.2);
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 24px;
+        }
+        .cs-close-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 11px 24px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .cs-close-btn:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--text-primary);
+        }
+
+        /* ── Demo ── */
+        .demo { padding: 100px 0; background: var(--primary-bg); }
         
-        /* Footer */
+        .demo-chat {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 28px;
+            border: 1px solid var(--border-color);
+            max-height: 480px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 18px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            max-width: 82%;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .message.user {
+            background: linear-gradient(135deg, rgba(0,200,255,0.2), rgba(0,200,255,0.1));
+            border: 1px solid rgba(0,200,255,0.25);
+            color: white;
+            margin-left: auto;
+        }
+        .message.assistant {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+        }
+        .message-header {
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
+        .message.user .message-header { color: rgba(0,200,255,0.8); }
+        
+        /* ── Footer ── */
         .footer {
             background: var(--primary-bg);
-            padding: 60px 0 30px;
+            padding: 60px 0 32px;
             border-top: 1px solid var(--border-color);
         }
-        
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 32px;
+            margin-bottom: 32px;
             flex-wrap: wrap;
         }
-        
         .footer-links a {
-            color: var(--text-secondary);
+            color: var(--text-muted);
             text-decoration: none;
+            font-size: 0.9rem;
             font-weight: 500;
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        
-        .footer-links a:hover {
-            color: var(--accent-color);
-        }
-        
+        .footer-links a:hover { color: var(--accent-color); }
         .footer-bottom {
             text-align: center;
-            padding-top: 30px;
+            padding-top: 28px;
             border-top: 1px solid var(--border-color);
-            color: var(--text-secondary);
+            color: var(--text-muted);
+            font-size: 0.85rem;
         }
         
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
-            .hero .subtitle {
-                font-size: 1.1rem;
-            }
-            
-            .cta-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn-primary, .btn-outline {
-                width: 100%;
-                max-width: 300px;
-            }
-            
-            .feature-card, .step-card {
-                margin-bottom: 20px;
-            }
-        }
-        
-        /* Scroll animations */
+        /* ── Animations ── */
         .fade-in {
             opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s ease;
+            transform: translateY(28px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
         }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
         
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .hero { padding: 120px 0 80px; }
+            .hero-logo { width: 72px; height: 72px; font-size: 2.2rem; }
+            .cta-buttons { flex-direction: column; align-items: center; }
+            .btn-primary-cta, .btn-ghost-cta { width: 100%; max-width: 320px; justify-content: center; }
         }
     </style>
 </head>
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation"></div>
+    <!-- Glows -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- Coming Soon Modal -->
+    <div class="cs-overlay" id="csOverlay" onclick="handleOverlayClick(event)">
+        <div class="cs-modal" id="csModal">
+            <button class="cs-modal-close" onclick="closeComingSoon()" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="cs-icon">🚀</div>
+            <div class="cs-title">Coming <span>Soon</span></div>
+            <p class="cs-desc">
+                We're building the hosted version of TradingView MCP Server.<br>
+                Get instant access to all features — no setup required.
+            </p>
+            <div class="cs-price-tag">
+                <i class="fas fa-bolt"></i>
+                $5 / month — Unlimited Analysis
+            </div>
+            <br>
+            <button class="cs-close-btn" onclick="closeComingSoon()">Got it, I'll wait!</button>
+        </div>
+    </div>
     
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <div class="icon">
-                    <i class="fas fa-search-dollar"></i>
-                </div>
+                <div class="brand-logo">📈</div>
                 CryptoSieve
+                <span class="nav-badge">MCP</span>
             </a>
             <div class="ms-auto d-flex align-items-center gap-3">
-                <a href="/" class="nav-link">
+                <a href="/" class="nav-link d-none d-md-block">
                     <i class="fas fa-chart-line me-1"></i>Live Screener
                 </a>
-                <a href="https://github.com/atilaahmettaner/tradingview-mcp" target="_blank" class="btn-outline" style="padding: 8px 16px; font-size: 0.9rem;">
-                    <i class="fab fa-github me-2"></i>GitHub
+                <a href="#pricing" class="nav-link d-none d-md-block">Pricing</a>
+                <a href="https://github.com/atilaahmettaner/tradingview-mcp" target="_blank" class="btn-nav">
+                    <i class="fab fa-github"></i>GitHub
                 </a>
             </div>
         </div>
@@ -489,117 +920,173 @@
     <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="container">
-            <div class="hero-content fade-in">
-                <h1>TradingView MCP Server</h1>
+            <div class="hero-content text-center fade-in">
+                <div class="hero-logo">📊</div>
+                <div class="hero-badge">
+                    <span class="dot"></span>
+                    Model Context Protocol
+                </div>
+                <h1>
+                    TradingView<br>
+                    <span class="gradient-text">MCP Server</span>
+                </h1>
                 <p class="subtitle">
-                    Advanced cryptocurrency and stock market analysis for Claude AI. 
-                    Real-time data, technical indicators, and intelligent Bollinger Band analysis.
+                    Real-time market data, technical indicators, and Bollinger Band intelligence — 
+                    directly inside Claude AI. Zero setup with hosted access.
                 </p>
                 <div class="cta-buttons">
-                    <a href="#installation" class="btn btn-primary">
-                        <i class="fas fa-download me-2"></i>Get Started
-                    </a>
-                    <a href="#demo" class="btn-outline">
-                        <i class="fas fa-play me-2"></i>See Demo
+                    <button class="btn-primary-cta" id="heroHostedBtn" onclick="openComingSoon()">
+                        <i class="fas fa-bolt"></i>
+                        Get Hosted Access
+                    </button>
+                    <a href="#installation" class="btn-ghost-cta">
+                        <i class="fas fa-terminal"></i>
+                        Self-host Free
                     </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="stats">
+    <!-- Stats Strip -->
+    <div class="stats-strip">
         <div class="container">
-            <div class="row">
-                <div class="col-md-3 col-6">
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
                     <div class="stat-item fade-in">
                         <div class="stat-number">8+</div>
                         <div class="stat-label">Exchanges</div>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
+                <div class="col-6 col-md-3">
                     <div class="stat-item fade-in">
                         <div class="stat-number">15+</div>
                         <div class="stat-label">Indicators</div>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
+                <div class="col-6 col-md-3">
                     <div class="stat-item fade-in">
                         <div class="stat-number">6</div>
                         <div class="stat-label">Timeframes</div>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
+                <div class="col-6 col-md-3">
                     <div class="stat-item fade-in">
-                        <div class="stat-number">Real-time</div>
-                        <div class="stat-label">Data</div>
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Real-time</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header fade-in">
+                <div class="section-tag">Features</div>
+                <h2>Everything for Professional Analysis</h2>
+                <p>All the market intelligence you need, delivered directly to Claude AI</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                        <h3>Real-time Market Screening</h3>
+                        <p>Find top gainers, losers, and trending assets across multiple exchanges with instant data updates.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                        <h3>AI-Powered Analysis</h3>
+                        <p>Advanced technical analysis with Bollinger Bands, RSI, MACD, and proprietary signal rating system.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon"><i class="fas fa-globe"></i></div>
+                        <h3>Multi-Market Support</h3>
+                        <p>Crypto exchanges (KuCoin, Binance, Bybit) and traditional markets (NASDAQ, BIST) in one place.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon"><i class="fas fa-search"></i></div>
+                        <h3>Pattern Recognition</h3>
+                        <p>Detect consecutive candle patterns, Bollinger Band squeezes, and breakout opportunities automatically.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon"><i class="fas fa-clock"></i></div>
+                        <h3>Multi-Timeframe</h3>
+                        <p>Analyze from 5-minute to monthly charts for a comprehensive market perspective.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                        <h3>Claude Integration</h3>
+                        <p>Seamlessly integrated with Claude Desktop through the Model Context Protocol (MCP).</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="features">
+    <!-- PRICING SECTION -->
+    <section id="pricing" class="pricing">
         <div class="container">
             <div class="section-header fade-in">
-                <h2>Powerful Features</h2>
-                <p>Everything you need for professional market analysis directly in Claude</p>
+                <div class="section-tag">Pricing</div>
+                <h2>Simple, Transparent Pricing</h2>
+                <p>Start free with self-hosting or go hosted for zero-config instant access</p>
             </div>
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="feature-card fade-in">
-                        <div class="feature-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <h3>Real-time Market Screening</h3>
-                        <p>Find top gainers, losers, and trending assets across multiple exchanges with instant data updates.</p>
+
+            <div class="pricing-grid fade-in">
+                <!-- Hosted Card -->
+                <div class="pricing-card featured">
+                    <span class="pricing-badge">Popular</span>
+                    <div class="plan-icon hosted"><i class="fas fa-bolt"></i></div>
+                    <div class="plan-name">Hosted</div>
+                    <div class="plan-price">
+                        <span class="price-amount gradient">$5</span>
+                        <span class="price-period">/ month</span>
                     </div>
+                    <p class="plan-desc">Unlimited market analysis with zero setup. We handle everything.</p>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check fi"></i> Unlimited market analyses</li>
+                        <li><i class="fas fa-check fi"></i> All 8+ exchanges included</li>
+                        <li><i class="fas fa-check fi"></i> Auto-updated, always live</li>
+                        <li><i class="fas fa-check fi"></i> No server setup needed</li>
+                        <li><i class="fas fa-check fi"></i> Priority support</li>
+                    </ul>
+                    <button class="btn-hosted" id="pricingHostedBtn" onclick="openComingSoon()">
+                        <i class="fas fa-bolt"></i>
+                        Get Hosted Access
+                    </button>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="feature-card fade-in">
-                        <div class="feature-icon">
-                            <i class="fas fa-brain"></i>
-                        </div>
-                        <h3>AI-Powered Analysis</h3>
-                        <p>Advanced technical analysis with Bollinger Bands, RSI, MACD, and proprietary rating system.</p>
+
+                <!-- Self-host Card -->
+                <div class="pricing-card">
+                    <div class="plan-icon selfhost"><i class="fab fa-github"></i></div>
+                    <div class="plan-name">Self-hosted</div>
+                    <div class="plan-price">
+                        <span class="price-amount">Free</span>
                     </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="feature-card fade-in">
-                        <div class="feature-icon">
-                            <i class="fas fa-globe"></i>
-                        </div>
-                        <h3>Multi-Market Support</h3>
-                        <p>Crypto exchanges (KuCoin, Binance, Bybit) and traditional markets (NASDAQ, BIST) in one place.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="feature-card fade-in">
-                        <div class="feature-icon">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <h3>Pattern Recognition</h3>
-                        <p>Detect consecutive candle patterns, Bollinger Band squeezes, and breakout opportunities.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="feature-card fade-in">
-                        <div class="feature-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <h3>Multi-Timeframe</h3>
-                        <p>Analyze from 5-minute to monthly charts for comprehensive market perspective.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="feature-card fade-in">
-                        <div class="feature-icon">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <h3>Claude Integration</h3>
-                        <p>Seamlessly integrated with Claude Desktop through Model Context Protocol (MCP).</p>
-                    </div>
+                    <p class="plan-desc">Open-source forever. Run it yourself on your own machine.</p>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check fi"></i> Full open-source access</li>
+                        <li><i class="fas fa-check fi"></i> All features included</li>
+                        <li><i class="fas fa-check fi"></i> Run on your own server</li>
+                        <li><i class="fas fa-times fi muted"></i> Requires Python + UV setup</li>
+                        <li><i class="fas fa-times fi muted"></i> Self-managed updates</li>
+                    </ul>
+                    <a href="https://github.com/atilaahmettaner/tradingview-mcp" target="_blank" class="btn-selfhost">
+                        <i class="fab fa-github"></i>
+                        View on GitHub
+                    </a>
                 </div>
             </div>
         </div>
@@ -609,6 +1096,7 @@
     <section id="installation" class="installation">
         <div class="container">
             <div class="section-header fade-in">
+                <div class="section-tag">Self-hosting</div>
                 <h2>Quick Installation</h2>
                 <p>Get up and running in minutes with our simple setup process</p>
             </div>
@@ -619,36 +1107,16 @@
                     <div class="step-card fade-in">
                         <div class="step-number">1</div>
                         <h3>Install UV Package Manager</h3>
-                        <p>UV is a fast Python package manager that handles all dependencies automatically. Choose your preferred installation method:</p>
-                        
-                        <h5 class="mt-4 mb-3">Option 1: Using Brew (macOS - Recommended)</h5>
+                        <p>UV is a fast Python package manager that handles all dependencies automatically.</p>
+                        <h6 class="mt-4 mb-2" style="color:var(--text-secondary);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">macOS (Recommended)</h6>
                         <div class="code-block">
                             <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
                             <pre>brew install uv</pre>
                         </div>
-                        <p class="text-muted small mt-2">
-                            <i class="fas fa-info-circle me-1"></i>
-                            <strong>Recommended for macOS users:</strong> Brew automatically handles PATH configuration and updates.
-                        </p>
-                        
-                        <h5 class="mt-4 mb-3">Option 2: Direct Installation</h5>
+                        <h6 class="mt-3 mb-2" style="color:var(--text-secondary);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Linux / Windows</h6>
                         <div class="code-block">
                             <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
-                            <pre># Option 1: Homebrew (macOS - Recommended)
-brew install uv
-
-# Option 2: Direct Installation
-# On macOS/Linux
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# On Windows
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</pre>
-                        </div>
-                        
-                        <h5 class="mt-4 mb-3">Verify Installation:</h5>
-                        <div class="code-block">
-                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
-                            <pre>uv --version</pre>
+                            <pre>curl -LsSf https://astral.sh/uv/install.sh | sh</pre>
                         </div>
                     </div>
 
@@ -657,21 +1125,16 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
                         <div class="step-number">2</div>
                         <h3>Configure Claude Desktop</h3>
                         <p>Add the MCP server to your Claude Desktop configuration file.</p>
-                        
-                        <h5 class="mt-4 mb-3">Find your config file:</h5>
+                        <h6 class="mt-4 mb-2" style="color:var(--text-secondary);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Config file location</h6>
                         <div class="code-block">
                             <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
                             <pre># macOS
 ~/Library/Application Support/Claude/claude_desktop_config.json
 
 # Windows
-%APPDATA%\Claude\claude_desktop_config.json
-
-# Linux
-~/.config/Claude/claude_desktop_config.json</pre>
+%APPDATA%\Claude\claude_desktop_config.json</pre>
                         </div>
-
-                        <h5 class="mt-4 mb-3">Add this configuration:</h5>
+                        <h6 class="mt-3 mb-2" style="color:var(--text-secondary);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Add this configuration</h6>
                         <div class="code-block">
                             <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
                             <pre>{
@@ -695,7 +1158,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
                     <div class="step-card fade-in">
                         <div class="step-number">3</div>
                         <h3>Restart Claude Desktop</h3>
-                        <p>Completely quit and restart Claude Desktop. The first startup may take 30-60 seconds as it downloads dependencies.</p>
+                        <p>Completely quit and restart Claude Desktop. The first startup may take 30–60 seconds as it downloads dependencies.</p>
                     </div>
 
                     <!-- Step 4 -->
@@ -717,12 +1180,13 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
     <section id="demo" class="demo">
         <div class="container">
             <div class="section-header fade-in">
+                <div class="section-tag">Demo</div>
                 <h2>See It In Action</h2>
                 <p>Real examples of what you can ask Claude with TradingView MCP</p>
             </div>
             
-            <div class="row">
-                <div class="col-lg-6 mb-4">
+            <div class="row g-4">
+                <div class="col-lg-6">
                     <div class="demo-chat fade-in">
                         <div class="message user">
                             <div class="message-header">You</div>
@@ -730,21 +1194,19 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
                         </div>
                         <div class="message assistant">
                             <div class="message-header">Claude</div>
-                            Here are the top 10 crypto gainers on KuCoin in the last 15 minutes:
-                            
-                            <br><br><strong>Top Performers:</strong>
-                            <br>1. GARUSDT: +5.577% 
-                            <br>2. LUNCDOWNUSDT: +4.788%
-                            <br>3. DFIUSDT: +5.375%
-                            <br>4. PBXUSDT: +3.377%
-                            <br>5. RBTC1USDT: +3.081%
-                            
-                            <br><br>All coins show strong momentum with Bollinger Band ratings indicating potential continuation...
+                            Here are the top 10 crypto gainers on KuCoin:<br><br>
+                            <strong>Top Performers:</strong><br>
+                            1. GARUSDT: +5.577%<br>
+                            2. LUNCDOWNUSDT: +4.788%<br>
+                            3. DFIUSDT: +5.375%<br>
+                            4. PBXUSDT: +3.377%<br>
+                            5. RBTC1USDT: +3.081%<br><br>
+                            All coins show strong momentum with Bollinger Band ratings indicating potential continuation...
                         </div>
                     </div>
                 </div>
                 
-                <div class="col-lg-6 mb-4">
+                <div class="col-lg-6">
                     <div class="demo-chat fade-in">
                         <div class="message user">
                             <div class="message-header">You</div>
@@ -752,73 +1214,41 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
                         </div>
                         <div class="message assistant">
                             <div class="message-header">Claude</div>
-                            <strong>Bitcoin (BTCUSDT) Technical Analysis:</strong>
-                            
-                            <br><br><strong>Price Action:</strong>
-                            <br>• Current: $67,234.50
-                            <br>• Change: +2.45% (24h)
-                            
-                            <br><br><strong>Technical Indicators:</strong>
-                            <br>• Bollinger Band Rating: +2 (Bullish Bias)
-                            <br>• RSI(14): 68.3 (Bullish)
-                            <br>• MACD: Bullish crossover
-                            <br>• EMA20: Above (Uptrend)
-                            
-                            <br><br>Overall sentiment: Strong bullish momentum with room for growth...
+                            <strong>Bitcoin (BTCUSDT) Technical Analysis:</strong><br><br>
+                            <strong>Price Action:</strong><br>
+                            • Current: $67,234.50<br>
+                            • Change: +2.45% (24h)<br><br>
+                            <strong>Technical Indicators:</strong><br>
+                            • Bollinger Band Rating: +2 (Bullish Bias)<br>
+                            • RSI(14): 68.3 (Bullish)<br>
+                            • MACD: Bullish crossover<br>
+                            • EMA20: Above (Uptrend)<br><br>
+                            Overall: Strong bullish momentum with room for growth...
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="row mt-4">
-                <div class="col-lg-12">
+                <div class="col-lg-10 mx-auto">
                     <div class="feature-card fade-in">
-                        <h4><i class="fas fa-lightbulb me-2"></i>More Example Queries:</h4>
-                        <div class="row mt-3">
+                        <h4 style="font-size:1rem;font-weight:700;margin-bottom:16px;"><i class="fas fa-lightbulb me-2" style="color:var(--accent-color);"></i>More Example Queries</h4>
+                        <div class="row">
                             <div class="col-md-6">
-                                <ul class="list-unstyled">
-                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Find crypto coins with Bollinger Band squeeze"</li>
-                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Show me NASDAQ stocks with strong momentum"</li>
-                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Find coins with 3 consecutive green candles"</li>
+                                <ul class="list-unstyled" style="margin:0;">
+                                    <li class="mb-2" style="font-size:0.88rem;color:var(--text-secondary);"><i class="fas fa-chevron-right me-2" style="color:var(--accent-secondary);font-size:0.7rem;"></i>"Find crypto coins with Bollinger Band squeeze"</li>
+                                    <li class="mb-2" style="font-size:0.88rem;color:var(--text-secondary);"><i class="fas fa-chevron-right me-2" style="color:var(--accent-secondary);font-size:0.7rem;"></i>"Show me NASDAQ stocks with strong momentum"</li>
+                                    <li class="mb-2" style="font-size:0.88rem;color:var(--text-secondary);"><i class="fas fa-chevron-right me-2" style="color:var(--accent-secondary);font-size:0.7rem;"></i>"Find coins with 3 consecutive green candles"</li>
                                 </ul>
                             </div>
                             <div class="col-md-6">
-                                <ul class="list-unstyled">
-                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Which Turkish stocks are down 5% today?"</li>
-                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Compare AAPL vs TSLA technical indicators"</li>
-                                    <li class="mb-2"><i class="fas fa-chevron-right me-2 text-success"></i>"Find high-volume crypto with RSI below 30"</li>
+                                <ul class="list-unstyled" style="margin:0;">
+                                    <li class="mb-2" style="font-size:0.88rem;color:var(--text-secondary);"><i class="fas fa-chevron-right me-2" style="color:var(--accent-secondary);font-size:0.7rem;"></i>"Which Turkish stocks are down 5% today?"</li>
+                                    <li class="mb-2" style="font-size:0.88rem;color:var(--text-secondary);"><i class="fas fa-chevron-right me-2" style="color:var(--accent-secondary);font-size:0.7rem;"></i>"Compare AAPL vs TSLA technical indicators"</li>
+                                    <li class="mb-2" style="font-size:0.88rem;color:var(--text-secondary);"><i class="fas fa-chevron-right me-2" style="color:var(--accent-secondary);font-size:0.7rem;"></i>"Find high-volume crypto with RSI below 30"</li>
                                 </ul>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Integration with CryptoSieve -->
-    <section class="installation" style="padding: 60px 0;">
-        <div class="container">
-            <div class="section-header fade-in">
-                <h2>Try Our Live Screener</h2>
-                <p>Experience the same powerful analysis in your browser</p>
-            </div>
-            
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center">
-                    <div class="feature-card fade-in">
-                        <div class="feature-icon mx-auto">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <h3>CryptoSieve Web Interface</h3>
-                        <p class="mb-4">
-                            Use our web-based Bollinger Band screener to test the same features 
-                            before setting up the MCP server. Real-time scanning, multiple exchanges, 
-                            and advanced technical analysis.
-                        </p>
-                        <a href="/" class="btn btn-primary">
-                            <i class="fas fa-external-link-alt me-2"></i>Open Live Screener
-                        </a>
                     </div>
                 </div>
             </div>
@@ -830,100 +1260,102 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
         <div class="container">
             <div class="footer-links">
                 <a href="https://github.com/atilaahmettaner/tradingview-mcp" target="_blank">
-                    <i class="fab fa-github me-2"></i>GitHub
+                    <i class="fab fa-github"></i>GitHub
                 </a>
                 <a href="https://github.com/atilaahmettaner/tradingview-mcp/blob/main/README.md" target="_blank">
-                    <i class="fas fa-book me-2"></i>Documentation
+                    <i class="fas fa-book"></i>Documentation
                 </a>
                 <a href="https://github.com/atilaahmettaner/tradingview-mcp/issues" target="_blank">
-                    <i class="fas fa-bug me-2"></i>Report Issues
+                    <i class="fas fa-bug"></i>Report Issues
                 </a>
-                <a href="/" target="_blank">
-                    <i class="fas fa-chart-line me-2"></i>Live Screener
+                <a href="/" >
+                    <i class="fas fa-chart-line"></i>Live Screener
                 </a>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 TradingView MCP Server | CryptoSieve. Built with ❤️ for traders and AI enthusiasts.</p>
-                <p class="mt-2">
-                    <small>Empowering intelligent trading decisions through advanced market analysis</small>
-                </p>
+                <p>© 2024 TradingView MCP Server · CryptoSieve · Built with ❤️ for traders and AI enthusiasts</p>
+                <p class="mt-1" style="font-size:0.8rem;">Empowering intelligent trading decisions through advanced market analysis</p>
             </div>
         </div>
     </footer>
-
+    
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Smooth scrolling for anchor links
+        // ── Coming Soon Modal ──
+        function openComingSoon() {
+            // Fire GA4 event (no navigation, just tracking)
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'hosted_access_interest', {
+                    event_category: 'monetization',
+                    event_label: 'coming_soon_modal'
+                });
+            }
+            document.getElementById('csOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeComingSoon() {
+            document.getElementById('csOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function handleOverlayClick(e) {
+            if (e.target === document.getElementById('csOverlay')) {
+                closeComingSoon();
+            }
+        }
+
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeComingSoon();
+        });
+
+        // ── Smooth scroll ──
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
 
-        // Copy to clipboard function
+        // ── Copy to clipboard ──
         function copyToClipboard(button) {
             const codeBlock = button.nextElementSibling;
             const text = codeBlock.textContent;
-            
             navigator.clipboard.writeText(text).then(() => {
-                const originalText = button.textContent;
-                button.textContent = 'Copied!';
-                button.style.background = '#4CAF50';
-                
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    button.style.background = 'var(--accent-color)';
-                }, 2000);
+                const orig = button.textContent;
+                button.textContent = '✓ Copied';
+                setTimeout(() => { button.textContent = orig; }, 2000);
             });
         }
 
-        // Scroll animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
+        // ── Scroll animations ──
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
+                if (entry.isIntersecting) entry.target.classList.add('visible');
             });
-        }, observerOptions);
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 
-        // Observe all fade-in elements
-        document.querySelectorAll('.fade-in').forEach(el => {
-            observer.observe(el);
-        });
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 100) {
-                navbar.style.background = 'rgba(21, 28, 44, 0.98)';
-            } else {
-                navbar.style.background = 'rgba(21, 28, 44, 0.95)';
-            }
-        });
-
-        // Initialize first visible elements
+        // Trigger visible elements on load
         setTimeout(() => {
-            document.querySelectorAll('.fade-in').forEach((el, index) => {
+            document.querySelectorAll('.fade-in').forEach((el, i) => {
                 if (el.getBoundingClientRect().top < window.innerHeight) {
-                    setTimeout(() => {
-                        el.classList.add('visible');
-                    }, index * 100);
+                    setTimeout(() => el.classList.add('visible'), i * 80);
                 }
             });
         }, 100);
+
+        // ── Navbar scroll ──
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            navbar.style.boxShadow = window.scrollY > 60
+                ? '0 4px 30px rgba(0,0,0,0.4)'
+                : 'none';
+        });
     </script>
 </body>
 </html>
