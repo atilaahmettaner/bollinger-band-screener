@@ -1071,7 +1071,7 @@ def api_waitlist():
             
             try:
                 resend.Emails.send({
-                    "from": "TradingView MCP Server <onboarding@resend.dev>",
+                    "from": "CryptoSieve <hello@videosherlock.com>",
                     "to": email,
                     "subject": "Welcome to the TradingView MCP Server Waitlist!",
                     "html": email_html
