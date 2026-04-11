@@ -1055,7 +1055,7 @@ def api_waitlist():
                         <p style="margin-bottom: 24px; font-size: 16px; color: #cbd5e1;">In the meantime, feel free to check out our open-source project and give us a star if you haven't already!</p>
                         
                         <div style="text-align: center; margin: 40px 0;">
-                            <a href="https://github.com/atilaahmettaner/tradingview-mcp" style="display: inline-block; background-color: #38bdf8; color: #0f172a; text-decoration: none; padding: 14px 28px; font-weight: bold; border-radius: 8px; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">View GitHub Repo</a>
+                            <a href="https://github.com/atilaahmettaner/bollinger-band-screener" style="display: inline-block; background-color: #38bdf8; color: #0f172a; text-decoration: none; padding: 14px 28px; font-weight: bold; border-radius: 8px; font-size: 16px; letter-spacing: 0.5px;">VIEW GITHUB REPO</a>
                         </div>
                         
                         <p style="margin-bottom: 0; font-size: 16px; color: #cbd5e1;">Happy Trading,<br><strong>The CryptoSieve Team</strong></p>
