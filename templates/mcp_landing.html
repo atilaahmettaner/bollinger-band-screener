@@ -1164,8 +1164,18 @@
                 <i class="fas fa-bolt"></i>
                 $5 / month — Unlimited Analysis
             </div>
-            <br>
-            <button class="cs-close-btn" onclick="closeComingSoon()">Got it, I'll wait!</button>
+            
+            <form id="waitlistForm" onsubmit="submitWaitlist(event)" class="mt-4">
+                <div class="input-group mb-3" style="max-width: 320px; margin: 0 auto;">
+                    <input type="email" id="waitlistEmail" class="form-control" placeholder="Enter your email" required 
+                        style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 200, 255, 0.2); color: white; border-radius: 8px 0 0 8px;">
+                    <button class="btn btn-primary" type="submit" id="waitlistSubmitBtn"
+                        style="background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary)); border: none; color: black; font-weight: 700; border-radius: 0 8px 8px 0;">
+                        Join Waitlist
+                    </button>
+                </div>
+                <div id="waitlistMessage" class="mt-2" style="font-size: 0.85rem; height: 20px;"></div>
+            </form>
         </div>
     </div>
 
@@ -1647,6 +1657,51 @@
         function handleOverlayClick(e) {
             if (e.target === document.getElementById('csOverlay')) {
                 closeComingSoon();
+            }
+        }
+
+        // Waitlist Submit Handler
+        async function submitWaitlist(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('waitlistEmail');
+            const submitBtn = document.getElementById('waitlistSubmitBtn');
+            const msgBox = document.getElementById('waitlistMessage');
+            
+            const email = emailInput.value.trim();
+            if(!email) return;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            msgBox.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/waitlist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const result = await response.json();
+                
+                if(response.ok && result.status === 'success') {
+                    msgBox.style.color = 'var(--accent-secondary)';
+                    msgBox.innerHTML = '<i class="fas fa-check-circle"></i> ' + result.message;
+                    emailInput.value = '';
+                    
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'waitlist_signup', { event_category: 'conversion' });
+                    }
+                    setTimeout(closeComingSoon, 2500);
+                } else {
+                    msgBox.style.color = '#ff6b6b';
+                    msgBox.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + (result.message || 'Error joining waitlist.');
+                }
+            } catch(error) {
+                msgBox.style.color = '#ff6b6b';
+                msgBox.innerHTML = '<i class="fas fa-exclamation-circle"></i> Network error.';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Join Waitlist';
             }
         }
 

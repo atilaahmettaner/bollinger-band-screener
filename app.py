@@ -12,6 +12,7 @@ from core.services.indicators import compute_metrics
 from core.services.coinlist import load_symbols
 from core.utils.validators import sanitize_timeframe, sanitize_exchange, EXCHANGE_SCREENER, ALLOWED_TIMEFRAMES
 from core.services.screener_provider import fetch_screener_indicators, fetch_screener_multi_changes
+import resend
 
 load_dotenv()
 
@@ -19,6 +20,7 @@ API_KEY = os.getenv('API_KEY')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'developmentsecretkey')
+resend.api_key = os.getenv('RESEND_API_KEY')
 
 if os.environ.get('DATABASE_URL'):
     db_url = os.environ.get('DATABASE_URL')
@@ -1004,6 +1006,83 @@ def multi_changes_api():
 def mcp_server():
     """Landing page for TradingView MCP Server"""
     return render_template('mcp_landing.html')
+
+@app.route('/api/waitlist', methods=['POST'])
+def api_waitlist():
+    try:
+        data = request.json
+        email = data.get('email')
+        
+        if not email:
+            return jsonify({'status': 'error', 'message': 'Email is required'}), 400
+            
+        try:
+            valid = validate_email(email)
+            email = valid.email
+        except EmailNotValidError as e:
+            return jsonify({'status': 'error', 'message': str(e)}), 400
+            
+        existing_subscriber = Subscriber.query.filter_by(email=email).first()
+        
+        if existing_subscriber:
+            return jsonify({'status': 'success', 'message': 'You are already on the waitlist!'})
+            
+        new_subscriber = Subscriber(email=email)
+        db.session.add(new_subscriber)
+        db.session.commit()
+        
+        if resend.api_key:
+            email_html = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+            </head>
+            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #e2e8f0; background-color: #0f172a; margin: 0; padding: 0;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #0f172a;">
+                    <div style="background-color: #1e293b; border-radius: 12px; padding: 40px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+                        <div style="font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 24px; text-align: center; letter-spacing: -0.5px;">
+                            TradingView <span style="color: #38bdf8;">MCP Server</span>
+                        </div>
+                        <h1 style="color: #f8fafc; font-size: 24px; margin-bottom: 16px; margin-top: 0; text-align: center;">You're on the list! 🚀</h1>
+                        <p style="margin-bottom: 24px; font-size: 16px; color: #cbd5e1;">Hey there,</p>
+                        <p style="margin-bottom: 24px; font-size: 16px; color: #cbd5e1;">Thank you for joining the exclusive waitlist for our <strong>Hosted TradingView MCP Server</strong>. We are thrilled to have you onboard.</p>
+                        
+                        <div style="background-color: rgba(56, 189, 248, 0.1); border-left: 4px solid #38bdf8; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
+                            <p style="margin: 0; color: #e0f2fe; font-size: 15px;"><strong>What's Next?</strong><br>We're currently scaling our infrastructure to handle high-frequency trading data and complex indicator computations seamlessly. As soon as early access is ready, you'll be the first to know.</p>
+                        </div>
+                        
+                        <p style="margin-bottom: 24px; font-size: 16px; color: #cbd5e1;">In the meantime, feel free to check out our open-source project and give us a star if you haven't already!</p>
+                        
+                        <div style="text-align: center; margin: 40px 0;">
+                            <a href="https://github.com/atilaahmettaner/tradingview-mcp" style="display: inline-block; background-color: #38bdf8; color: #0f172a; text-decoration: none; padding: 14px 28px; font-weight: bold; border-radius: 8px; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">View GitHub Repo</a>
+                        </div>
+                        
+                        <p style="margin-bottom: 0; font-size: 16px; color: #cbd5e1;">Happy Trading,<br><strong>The CryptoSieve Team</strong></p>
+                    </div>
+                    <div style="text-align: center; margin-top: 40px; font-size: 14px; color: #64748b;">
+                        <p style="margin: 5px 0;">© 2024 CryptoSieve · Advanced Market Analysis</p>
+                        <p style="margin: 5px 0;"><a href="https://cryptosieve.com/mcp-server" style="color: #38bdf8; text-decoration: none;">cryptosieve.com</a> | <a href="https://github.com/atilaahmettaner" style="color: #38bdf8; text-decoration: none;">GitHub</a></p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            
+            try:
+                resend.Emails.send({
+                    "from": "TradingView MCP Server <onboarding@resend.dev>",
+                    "to": email,
+                    "subject": "Welcome to the TradingView MCP Server Waitlist!",
+                    "html": email_html
+                })
+            except Exception as e:
+                print(f"Resend error: {e}")
+                
+        return jsonify({'status': 'success', 'message': 'Successfully joined the waitlist!'})
+         
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 if __name__ == '__main__':
