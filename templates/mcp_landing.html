@@ -1320,37 +1320,10 @@
         <div class="bg-glow bg-glow-1"></div>
         <div class="bg-glow bg-glow-2"></div>
 
-        <!-- Coming Soon Modal -->
-        <div class="cs-overlay" id="csOverlay" onclick="handleOverlayClick(event)">
-            <div class="cs-modal" id="csModal">
-                <button class="cs-modal-close" onclick="closeComingSoon()" aria-label="Close">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="cs-price-tag">
-                    <i class="fas fa-circle"></i>
-                    Hosted MCP Waitlist
-                </div>
-                <div class="cs-title">Crypto context for <span>agents.</span></div>
-                <p class="cs-desc">
-                    Join the early access list for the hosted TradingView MCP server.
-                    We will reach out when access opens.
-                </p>
-                
-                <form id="waitlistForm" data-waitlist-form class="waitlist-form-stack">
-                    <input
-                        type="email"
-                        id="waitlistEmail"
-                        class="waitlist-input"
-                        placeholder="you@fund.alpha"
-                        required
-                    >
-                    <button class="waitlist-submit" type="submit" id="waitlistSubmitBtn">
-                        Join Wishlist
-                    </button>
-                    <div id="waitlistMessage" class="waitlist-message" aria-live="polite"></div>
-                </form>
-            </div>
-        </div>
+        <!-- Coming-soon modal removed: hosted version (pro.cryptosieve.com)
+             went live on 2026-05-02. The "Get Hosted Access" button below
+             now links directly instead of opening this modal. -->
+
 
         <!-- Navigation -->
         {% include 'navbar.html' %}
@@ -1362,7 +1335,7 @@
                     <div class="hero-copy">
                         <div class="hero-badge">
                             <span class="dot"></span>
-                            Hosted MCP Waitlist
+                            Hosted version is live
                         </div>
                         <h1>
                             Tradingview Mcp<br>
@@ -1370,7 +1343,7 @@
                         </h1>
                         <p class="subtitle">
                             Tradingview MCP brings live market structure, Bollinger context, and symbol-level analysis
-                            into your AI workflow. Join the waitlist for first access to the hosted server.
+                            into your AI workflow. Try the hosted server in 60 seconds, or self-host the open-source core for free.
                         </p>
                         <div class="hero-signal-row">
                             <span class="hero-signal-chip">Real-time crypto feeds</span>
@@ -1378,6 +1351,10 @@
                             <span class="hero-signal-chip">Minimal setup</span>
                         </div>
                         <div class="cta-buttons">
+                            <a href="https://pro.cryptosieve.com" class="btn-primary-cta" rel="noopener">
+                                <i class="fas fa-bolt"></i>
+                                Try Hosted — $9/mo
+                            </a>
                             <a href="#installation" class="btn-ghost-cta">
                                 <i class="fas fa-terminal"></i>
                                 Self-host Free
@@ -1385,40 +1362,41 @@
                         </div>
                     </div>
 
+                    <!-- Hero side card: Pro CTA replaces the previous waitlist form.
+                         Hosted version is live at pro.cryptosieve.com — no waitlist
+                         needed. The card reuses the existing .hero-waitlist-card
+                         styling so the visual rhythm of the hero is preserved. -->
                     <aside class="hero-waitlist-card">
-                        <div class="hero-waitlist-label">Early Access</div>
-                        <div class="hero-waitlist-title">Get on the list</div>
+                        <div class="hero-waitlist-label">Hosted version</div>
+                        <div class="hero-waitlist-title">Live in Claude.ai in 60 seconds</div>
                         <p class="hero-waitlist-text">
-                            Drop your email. We’ll reach out when the hosted MCP server opens to early users.
+                            One connector URL. 27 screening tools. No <code>uv</code>, no Python,
+                            no firewall dance — paste, save, prompt.
                         </p>
 
-                        <form id="heroWaitlistForm" data-waitlist-form class="waitlist-form-stack">
-                            <input
-                                type="email"
-                                id="heroWaitlistEmail"
-                                class="waitlist-input"
-                                placeholder="you@fund.alpha"
-                                required
-                            >
-                            <button class="waitlist-submit" type="submit" id="heroWaitlistSubmitBtn">
-                                Join Wishlist
-                            </button>
-                            <div id="heroWaitlistMessage" class="waitlist-message" aria-live="polite"></div>
-                        </form>
+                        <div class="waitlist-form-stack">
+                            <a href="https://pro.cryptosieve.com" class="waitlist-submit" rel="noopener" style="text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+                                Get started — $9 / month
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            <p class="waitlist-message" style="opacity:0.7;font-size:12px;text-align:center;margin:0;">
+                                7-day free trial · cancel any time
+                            </p>
+                        </div>
 
                         <div class="hero-waitlist-footer">
                             <div>
-                                <strong>MCP-first</strong>
-                                <span>Purpose-built for crypto research workflows.</span>
+                                <strong>2,500 calls / mo</strong>
+                                <span>60 / minute ceiling. Plenty for daily screening.</span>
                             </div>
                             <div>
-                                <strong>No noise</strong>
-                                <span>One email, one invite when access is ready.</span>
+                                <strong>Open core</strong>
+                                <span>Skip the ops or fork the repo — your call.</span>
                             </div>
                         </div>
 
                         <a href="https://github.com/atilaahmettaner/tradingview-mcp" target="_blank" class="hero-repo-link">
-                            View open source repo
+                            Self-host on GitHub →
                         </a>
                     </aside>
                 </div>
@@ -1598,10 +1576,10 @@
                             <li><i class="fas fa-check fi"></i> No server setup needed</li>
                             <li><i class="fas fa-check fi"></i> Priority support</li>
                         </ul>
-                        <button class="btn-hosted" id="pricingHostedBtn" onclick="openComingSoon()">
+                        <a class="btn-hosted" id="pricingHostedBtn" href="https://pro.cryptosieve.com" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
                             <i class="fas fa-bolt"></i>
                             Get Hosted Access
-                        </button>
+                        </a>
                     </div>
 
                     <!-- Self-host Card -->
@@ -1851,93 +1829,24 @@
         <!-- Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            // ── Coming Soon Modal ──
-            function openComingSoon() {
-                // Fire GA4 event (no navigation, just tracking)
-                if (typeof gtag !== 'undefined') {
-                    gtag('event', 'hosted_access_interest', {
-                        event_category: 'monetization',
-                        event_label: 'coming_soon_modal'
-                    });
-                }
-                document.getElementById('csOverlay').classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
+            // Waitlist + coming-soon modal logic was removed when the hosted
+            // version went live (2026-05-02). Pre-launch we collected ~52
+            // emails via /api/waitlist; that endpoint can stay alive on the
+            // backend (no harm) but no UI element calls it anymore. The hero
+            // CTA and pricing card both link directly to pro.cryptosieve.com
+            // now — visitors don't need a queue, they need a checkout.
 
-            function closeComingSoon() {
-                document.getElementById('csOverlay').classList.remove('active');
-                document.body.style.overflow = '';
-            }
-
-            function handleOverlayClick(e) {
-                if (e.target === document.getElementById('csOverlay')) {
-                    closeComingSoon();
-                }
-            }
-
-            // Waitlist Submit Handler
-            async function submitWaitlist(form) {
-                const emailInput = form.querySelector('input[type="email"]');
-                const submitBtn = form.querySelector('button[type="submit"]');
-                const msgBox = form.querySelector('.waitlist-message');
-                const defaultLabel = submitBtn.dataset.defaultLabel || submitBtn.textContent.trim();
-                submitBtn.dataset.defaultLabel = defaultLabel;
-
-                const email = emailInput.value.trim();
-                if (!email) {
-                    msgBox.className = 'waitlist-message error';
-                    msgBox.textContent = 'Email is required.';
-                    return;
-                }
-
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Submitting...';
-                msgBox.className = 'waitlist-message';
-                msgBox.textContent = '';
-
-                try {
-                    const response = await fetch('/api/waitlist', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email })
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if(response.ok && result.status === 'success') {
-                        msgBox.className = 'waitlist-message success';
-                        msgBox.textContent = result.message;
-                        emailInput.value = '';
-                        
-                        if (typeof gtag !== 'undefined') {
-                            gtag('event', 'waitlist_signup', { event_category: 'conversion' });
-                        }
-                        if (form.id === 'waitlistForm') {
-                            setTimeout(closeComingSoon, 2200);
-                        }
-                    } else {
-                        msgBox.className = 'waitlist-message error';
-                        msgBox.textContent = result.message || 'Error joining waitlist.';
+            // Track outbound clicks on the Pro CTA so we can measure the
+            // conversion path from this OSS landing → hosted product.
+            document.querySelectorAll('a[href^="https://pro.cryptosieve.com"]').forEach((link) => {
+                link.addEventListener('click', function () {
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'hosted_cta_click', {
+                            event_category: 'monetization',
+                            event_label: link.textContent.trim().slice(0, 40),
+                        });
                     }
-                } catch(error) {
-                    msgBox.className = 'waitlist-message error';
-                    msgBox.textContent = 'Network error.';
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = defaultLabel;
-                }
-            }
-
-            document.querySelectorAll('[data-waitlist-form]').forEach((form) => {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    submitWaitlist(form);
                 });
-            });
-
-            // Close on Escape
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') closeComingSoon();
             });
 
             // ── Smooth scroll ──
