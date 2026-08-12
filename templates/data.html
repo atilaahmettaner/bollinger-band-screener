@@ -169,6 +169,9 @@
                 <button class="back-button" onclick="goBack()">
                     <i class="fas fa-arrow-left"></i> Back
                 </button>
+                <button class="btn btn-outline-light ms-2" onclick="exportSymbolsToTxt()">
+                    <i class="fas fa-download"></i> Export to TXT
+                </button>
             </div>
         </div>
     </div>
@@ -376,6 +379,26 @@ function updateStats() {
 
 function goBack() {
     window.history.back();
+}
+
+function exportSymbolsToTxt() {
+    var table = $('#coinsTable').DataTable();
+    var rows = table.rows().data();
+    var symbols = [];
+    rows.each(function(row) {
+        var symbol = row[1].replace(/<[^>]*>/g, '').trim();
+        if (symbol) symbols.push(symbol);
+    });
+
+    var blob = new Blob([symbols.join('\n')], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'symbols.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 function showCoinDetails(coin) {
